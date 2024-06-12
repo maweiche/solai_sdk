@@ -3,10 +3,7 @@
 // 2. Get the Current Admin of the Program
 
 import { SDK } from ".";
-import * as anchor from "@coral-xyz/anchor";
-import sol_factory_idl from "src/idl/sol_factory.json";
-import { PublicKey, Transaction, Connection, ComputeBudgetProgram, SystemProgram, sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
-import { TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { PublicKey, Transaction, Connection, SystemProgram } from "@solana/web3.js";
 
 export class Admin {
     private readonly sdk: SDK;
@@ -14,6 +11,7 @@ export class Admin {
     constructor(sdk: SDK) {
         this.sdk = sdk;
     }
+    
     /**
      * 
      * 
@@ -28,7 +26,6 @@ export class Admin {
     ): Promise<string>{
         try{
             const program = this.sdk.program;
-
             const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.toBuffer()], program.programId)[0];
             const newAdminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), newAdmin ? newAdmin.toBuffer() : admin.toBuffer()], program.programId)[0];
 
