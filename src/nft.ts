@@ -27,6 +27,7 @@ export class Nft {
      */
 
     public async createNft(
+        connection: Connection,
         url: string,
         bearer: string,
         collectionAccount: PublicKey,
@@ -36,8 +37,6 @@ export class Nft {
         try{
             const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
             const id = Math.floor(Math.random() * 100000);
-
-            const connection = new Connection("https://api.devnet.solana.com", "finalized");
             const programId = new PublicKey("EsgdV69W9Qi6i2q6Gfus8vuy27aXwrf61gC1z1hbnr6d");
 
             const program = new anchor.Program(sol_factory_idl as anchor.Idl, programId);
@@ -58,7 +57,7 @@ export class Nft {
               const nft_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), nft.toBuffer()], program.programId)[0];
               
               const auth = PublicKey.findProgramAddressSync([Buffer.from('auth')], program.programId)[0];
-              const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), payer.toBuffer()], program.programId)[0];
+              const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), payer.publicKey.toBuffer()], program.programId)[0];
               let ownerNftAta = getAssociatedTokenAddressSync(nft_mint, owner, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)
     
               const createNftIx = await program.methods
