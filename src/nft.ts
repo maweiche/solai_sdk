@@ -37,9 +37,7 @@ export class Nft {
         try{
             const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
             const id = Math.floor(Math.random() * 100000);
-            const programId = new PublicKey("EsgdV69W9Qi6i2q6Gfus8vuy27aXwrf61gC1z1hbnr6d");
-
-            const program = new anchor.Program(sol_factory_idl as anchor.Idl, programId);
+            const program = this.sdk.program;
 
             const nft_data = await fetch(url, {
                 method: 'POST',
@@ -120,6 +118,4 @@ export class Nft {
             throw new Error(`Failed to create NFT: ${error}`);
         }
     }
-
-
 };

@@ -1,9 +1,3 @@
-export {
-  useUploader,
-  useArweaveStorage,
-  useShadowStorage,
-} from "./hooks"
-
 import * as anchor from "@project-serum/anchor";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { Cluster } from "@solana/web3.js";
