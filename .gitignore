@@ -5,6 +5,7 @@
 /lib
 /.pnp
 .pnp.js
+/test-wallet
 
 # testing
 /coverage

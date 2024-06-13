@@ -3,7 +3,13 @@
 // 2. Get the Current Admin of the Program
 
 import { SDK } from ".";
-import { PublicKey, Transaction, Connection, SystemProgram } from "@solana/web3.js";
+import { PublicKey, Transaction, Connection, SystemProgram, MemcmpFilter, DataSizeFilter, GetProgramAccountsConfig } from "@solana/web3.js";
+
+export type AdminAccount = {
+    publickey: string;
+    username: string;
+    initialized: string;
+}
 
 export class Admin {
     private readonly sdk: SDK;
@@ -17,6 +23,48 @@ export class Admin {
      * 
      * 
      */
+    public async checkIfAdmin(
+        connection: Connection,
+        admin: PublicKey
+    ): Promise<AdminAccount | undefined> {
+        const program = this.sdk.program;
+        const memcmp_filter: MemcmpFilter = {
+            memcmp: {
+                offset: 8,
+                bytes: admin.toBase58()
+            }
+        };
+        
+
+        const get_accounts_config: GetProgramAccountsConfig = {
+            commitment: "confirmed",
+            filters: [ memcmp_filter ]
+        };
+
+        try {
+        
+            const _admin = await connection.getProgramAccounts(
+                this.sdk.program.programId, 
+                get_accounts_config  
+            );
+
+
+            if(!_admin) return undefined;
+
+            const admin_decoded = program.coder.accounts.decode("Admin", _admin[0].account.data);
+
+            const admin = {
+                publickey: admin_decoded.publickey.toBase58(),
+                username: admin_decoded.username,
+                initialized: new Date(admin_decoded.initialized.toNumber() * 1000).toLocaleString(),
+            }
+
+            return admin;
+
+        } catch (error) {
+            throw new Error(`Failed to get Admin: ${error}`);
+        }
+    }
 
     public async initAdmin(
         connection: Connection,
@@ -35,7 +83,7 @@ export class Admin {
                     admin: admin,
                     adminState: null,
                     newAdmin: newAdmin ? newAdmin : admin,
-                    newAdminState: adminState,
+                    newAdminState: newAdmin ? newAdminState : adminState,
                     systemProgram: SystemProgram.programId,
                 })
                 .instruction()
@@ -53,7 +101,7 @@ export class Admin {
               });
             const base64 = serializedTransaction.toString("base64");
                 
-            return JSON.stringify({transaction: base64 })
+            return base64
         } catch (error) {
             throw new Error(`Failed to create NFT: ${error}`);
         }

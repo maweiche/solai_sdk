@@ -2,12 +2,21 @@ import * as anchor from "@project-serum/anchor";
 import { Wallet } from "@project-serum/anchor/dist/cjs/provider";
 import { Cluster } from "@solana/web3.js";
 // import { Connection, GraphQLConnection } from "./connection";
-import { SolFactory } from "src/idl/sol_factory";
-import sol_factory_idl from "src/idl/sol_factory.json";
+import { SolFactory } from "./idl/sol_factory";
+import sol_factory_idl from "./idl/sol_factory.json";
 import { SOL_FACTORY_PROGRAMS } from "./constants";
 
+import { Admin } from "./admin";
+import { Collection } from "./collection";
+import { Nft } from "./nft";
+import { Placeholder } from "./placeholder";
+
 export {
-  SOL_FACTORY_PROGRAMS
+  SOL_FACTORY_PROGRAMS,
+  Admin,
+  Collection,
+  Nft,
+  Placeholder
 };
 
 export class SDK {
@@ -32,4 +41,9 @@ export class SDK {
 
     this.rpcConnection = connection;
   }
+
+  public admin = new Admin(this);
+  public collection = new Collection(this);
+  public nft = new Nft(this);
+  public placeholder = new Placeholder(this);
 }

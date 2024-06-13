@@ -8,7 +8,7 @@
 import { SDK } from ".";
 import * as anchor from "@coral-xyz/anchor";
 import { PublicKey, Transaction, Connection, ComputeBudgetProgram, SystemProgram, sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
-import { TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 export class Placeholder {
     private readonly sdk: SDK;
@@ -27,16 +27,17 @@ export class Placeholder {
         admin: Keypair,
         buyer: PublicKey,
         collection: PublicKey,
+        id: number,
         uri: string,
     ): Promise<string>{
         try{
             const program = this.sdk.program;
             const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
-            const id = Math.floor(Math.random() * 100000);
             const placeholder = PublicKey.findProgramAddressSync([Buffer.from('placeholder'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
             const placeholder_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), placeholder.toBuffer()], program.programId)[0];
             const auth = PublicKey.findProgramAddressSync([Buffer.from('auth')], program.programId)[0];
             const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.publicKey.toBuffer()], program.programId)[0];
+            let buyerPlaceholderAta = getAssociatedTokenAddressSync(placeholder_mint, buyer, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
             const createPlaceholderIx = await program.methods
               .createPlaceholder(
                 new anchor.BN(id),
@@ -54,21 +55,38 @@ export class Placeholder {
                 systemProgram: SystemProgram.programId,
               })
               .instruction()
-
+            
+            const transferPlaceholderIx = await program.methods
+                .buyPlaceholder()
+                .accounts({
+                    payer: buyer,
+                    buyer: buyer,
+                    collection,
+                    buyerMintAta: buyerPlaceholderAta,
+                    placeholder,
+                    mint: placeholder_mint,
+                    auth,
+                    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    token2022Program: TOKEN_2022_PROGRAM_ID,
+                    systemProgram: SystemProgram.programId,
+                })
+                .instruction()
+                
             const { blockhash } = await connection.getLatestBlockhash("finalized");
             const transaction = new Transaction({
                 recentBlockhash: blockhash,
                 feePayer: buyer,
             });
 
-            transaction.add(modifyComputeUnitIx).add(createPlaceholderIx);
+            transaction.add(modifyComputeUnitIx).add(createPlaceholderIx).add(transferPlaceholderIx);
 
             const serializedTransaction = transaction.serialize({
                 requireAllSignatures: false,
               });
             const base64 = serializedTransaction.toString("base64");
                 
-            return JSON.stringify({transaction: base64 })
+            return base64;
         }catch(error){
             throw new Error(`Failed to create Placeholder: ${error}`);
         }
@@ -119,9 +137,7 @@ export class Placeholder {
                     { commitment: 'confirmed', skipPreflight: true }
                 );
 
-            return {
-                tx_signature: tx_signature,
-            }
+            return {tx_signature: tx_signature};
         } catch (error) {
             throw new Error(`Failed to burn Placeholder: ${error}`);
         }
