@@ -1,12 +1,12 @@
 {
   "name": "@solai/react-sdk",
-  "version": "3.0.1",
+  "version": "1.0.0",
   "license": "GPL-3.0",
   "description": "React SDK for SolAI",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maweiche",
-    "directory": "packages/react-sdk"
+    "url": "https://github.com/maweiche/solai_sdk",
+    "directory": "/src"
   },
   "exports": {
     ".": {
@@ -34,7 +34,7 @@
     "@project-serum/anchor": "^0.26.0",
     "@shadow-drive/sdk": "^3.3.0",
     "@solana/spl-token": "^0.4.6",
-    "@solana/wallet-adapter-react": "^0.15.26",
+    "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/web3.js": "^1.75.0",
     "axios": "^1.4.0",
     "chai": "^5.1.1",
@@ -75,6 +75,13 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  }
+    "registry": "https://registry.npmjs.org/",
+    "@maweiche:registry": "https://npm.pkg.github.com"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "author": "Matt Weichel",
+  "types": "./lib/index.d.ts"
 }
