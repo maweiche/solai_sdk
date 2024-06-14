@@ -63,7 +63,10 @@
     "build": "npm run clean && tsc && cp -r src/idl/*json lib/",
     "build:docs": "typedoc",
     "dev": "npm run clean && tsc && cp -r src/idl/*json lib/ && tsc -w",
-    "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts"
+    "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts",
+    "test:userFlow": "ts-mocha -p tsconfig.json tests/userFlow.spec.ts",
+    "test:userFlowSingleCall": "ts-mocha -p tsconfig.json tests/userFlowSingleCall.spec.ts",
+    "test:inscription": "ts-mocha -p tsconfig.json tests/inscription.spec.ts"
   },
   "keywords": [
     "solAi",

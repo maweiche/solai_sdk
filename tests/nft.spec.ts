@@ -25,7 +25,7 @@ const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
 const userWallet = new NodeWallet(userKeypair);
 anchor.setProvider(anchor.AnchorProvider.env());
 
-describe("Create a new placeholder nft", async () => {
+describe("Create a new ai nft", async () => {
   let sdk: SDK;
   const wallet = userWallet;
   const connection = new Connection("https://api.devnet.solana.com", "finalized");
@@ -51,6 +51,7 @@ describe("Create a new placeholder nft", async () => {
     console.log(`Your transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${connection.rpcEndpoint}`);
     return signature;
   }
+
   it("create and transfer a nft", async () => {
     sdk = new SDK(
       userWallet as NodeWallet,
@@ -59,19 +60,22 @@ describe("Create a new placeholder nft", async () => {
       "devnet",
     );
     const program = sdk.program;
-    const _keypair = require('../test-wallet/keypair.json')
-    const adminKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
-    const adminWallet = new NodeWallet(adminKeypair);
-    const collection_owner = new PublicKey("6KuX26FZqzqpsHDLfkXoBXbQRPEDEbstqNiPBKHNJQ9e");
-    const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collection_owner.toBuffer()], program.programId)[0];
+    const _keypair2 = require('../test-wallet/keypair2.json')
+    const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
+    const admin2Wallet = new NodeWallet(admin2Keypair);
+
+    const _keypair3 = require('../test-wallet/keypair3.json')
+    const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
+    const admin3Wallet = new NodeWallet(admin3KeyPair);
+    const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), userWallet.publicKey.toBuffer()], program.programId)[0];
 
     const _create_tx = await sdk.nft.createNft(
-        connection,
-        "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c",
-        "ad4a356ddba9eff73cd627f69a481b8493ed975d7aac909eec4aaebdd9b506ef",
-        collection,
-        userWallet.publicKey,
-        adminKeypair,
+      connection, // connection
+      "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c", // url for ai image
+      "ad4a356ddba9eff73cd627f69a481b8493ed975d7aac909eec4aaebdd9b506ef", // bearer
+      admin2Keypair, // admin
+      admin3Wallet.publicKey, // collection owner
+      admin2Wallet.publicKey, // buyer
     ); // returns base64 string
     console.log(_create_tx);
   });

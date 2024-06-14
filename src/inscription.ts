@@ -59,8 +59,8 @@ export class Inscription {
                 writeData(umi, {
                     inscriptionAccount,
                     inscriptionMetadataAccount,
-                    value: Buffer.from(
-                    JSON.stringify(metadata) // your NFT's JSON to be inscribed
+                        value: Buffer.from(
+                        JSON.stringify(metadata) // your NFT's JSON to be inscribed
                     ),
                     associatedTag: null,
                     offset: 0,

@@ -63,7 +63,7 @@ export class Collection {
         try{
             const program = this.sdk.program;
             const size_filter: DataSizeFilter = {
-                dataSize: 245
+                dataSize: 302
             };
 
             const get_accounts_config: GetProgramAccountsConfig = {
@@ -89,24 +89,6 @@ export class Collection {
                       return null;
                   }
               })
-
-            //   {
-            //     name: 'Test Collection',
-            //     symbol: 'TST',
-            //     owner: PublicKey [PublicKey(6KuX26FZqzqpsHDLfkXoBXbQRPEDEbstqNiPBKHNJQ9e)] {
-            //       _bn: <BN: 4f22455ffb17cfe0201d3198821764eda03b43535c9a3ee4c9ff8f121bb476a9>
-            //     },
-            //     saleStartTime: <BN: 61aa272ea6520>,
-            //     maxSupply: <BN: 64>,
-            //     totalSupply: <BN: 7>,
-            //     price: <BN: 1>,
-            //     stableId: 'TST',
-            //     reference: 'TST123',
-            //     whitelist: { wallets: [Array] },
-            //     whitelistStartTime: <BN: 61aa26dc40920>,
-            //     whitelistPrice: <BN: 0>
-            //   }
-
             return _collections_decoded;
         }catch(error){
             throw new Error(`Failed to get collections: ${error}`);
@@ -122,9 +104,9 @@ export class Collection {
         price: anchor.BN,
         stable_id: string,
         reference: string,
-        whitelist?: PublicKey[] | null,
-        whitelist_price?: anchor.BN | null,
-        whitelist_start_time?: anchor.BN | null,
+        whitelist?: PublicKey[] | undefined,
+        whitelist_price?: anchor.BN | undefined,
+        whitelist_start_time?: anchor.BN | undefined,
     ): Promise<string>{
         try{
             const program = this.sdk.program;
@@ -163,7 +145,7 @@ export class Collection {
               });
             const base64 = serializedTransaction.toString("base64");
                 
-            return JSON.stringify({transaction: base64 })
+            return base64;
         }catch(error){
             throw new Error(`Failed to create Placeholder: ${error}`);
         }

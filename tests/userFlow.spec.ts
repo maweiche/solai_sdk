@@ -25,27 +25,27 @@ const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
 const userWallet = new NodeWallet(userKeypair);
 anchor.setProvider(anchor.AnchorProvider.env());
 
-describe("Create a new placeholder nft", async () => {
-  let sdk: SDK;
-  const wallet = userWallet;
-  const connection = new Connection("https://api.devnet.solana.com", "finalized");
-  console.log('wallet', wallet.publicKey.toBase58());
+describe("Typical user flow of buying an NFT", async () => {
+    let sdk: SDK;
+    const wallet = userWallet;
+    const connection = new Connection("https://api.devnet.solana.com", "finalized");
+    console.log('wallet', wallet.publicKey.toBase58());
 
-  // Helpers
-  const id = Math.floor(Math.random() * 100000);
+    // Helpers
+    const id = Math.floor(Math.random() * 100000);
 
-  function wait(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
-  }
+    function wait(ms: number) {
+        return new Promise( resolve => setTimeout(resolve, ms) );
+    }
 
-  const confirm = async (signature: string): Promise<string> => {
-    const block = await connection.getLatestBlockhash();
-    await connection.confirmTransaction({
-      signature,
-      ...block
-    })
-    return signature
-  }
+    const confirm = async (signature: string): Promise<string> => {
+        const block = await connection.getLatestBlockhash();
+        await connection.confirmTransaction({
+            signature,
+            ...block
+        })
+        return signature
+    }
 
   const log = async(signature: string): Promise<string> => {
     console.log(`Your transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${connection.rpcEndpoint}`);
@@ -53,8 +53,7 @@ describe("Create a new placeholder nft", async () => {
   }
 
 
-
-  it("should create the placeholder", async () => {
+  it("should create a placeholder, create/transfer nft, burn placeholder", async () => {
     sdk = new SDK(
       userWallet as NodeWallet,
       new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
@@ -78,44 +77,36 @@ describe("Create a new placeholder nft", async () => {
     const _tx = await sdk.placeholder.createPlaceholder(
       connection,  // connection: Connection,
       admin2Keypair,  // admin: Keypair,
-      admin2Wallet.publicKey,  // admin: PublicKey,
+      admin2Wallet.publicKey,  // buyer: PublicKey,
       collection,  // collection: PublicKey,
       id,  // id: number,
       "https://www.example.com" // uri: string
     ); // returns base64 string
     const tx = Transaction.from(Buffer.from(_tx, "base64"));
     await sendAndConfirmTransaction(connection, tx, [admin2Keypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
-  });
 
-
-
-  it("should burn the placeholder", async () => {
-    sdk = new SDK(
-      userWallet as NodeWallet,
-      new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
-      { skipPreflight: true},
-      "devnet",
-    );
-    const program = sdk.program;
-    const _keypair2 = require('../test-wallet/keypair2.json')
-    const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
-    const admin2Wallet = new NodeWallet(admin2Keypair);
-
-    const _keypair3 = require('../test-wallet/keypair3.json')
-    const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
-    const admin3Wallet = new NodeWallet(admin3KeyPair);
-    console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
-
-    const collection_owner = admin3Wallet.publicKey;
-    const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collection_owner.toBuffer()], program.programId)[0];
+    
+  
+    const _create_tx = await sdk.nft.createNft(
+      connection, // connection
+      "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c", // url for ai image
+      "ad4a356ddba9eff73cd627f69a481b8493ed975d7aac909eec4aaebdd9b506ef", // bearer
+      admin2Keypair, // admin
+      admin3Wallet.publicKey, // collection owner
+      admin2Wallet.publicKey, // buyer
+    ); // returns base64 string
+    console.log(_create_tx);
 
     const { tx_signature }= await sdk.placeholder.burnPlaceholder(
-      connection, // connection
-      id, // id
-      admin2Keypair,  // admin
-      admin2Wallet.publicKey, // buyer
-      collection  // collection
-    ); // returns base64 string
-    console.log('signature', tx_signature)
+        connection, // connection
+        id, // id
+        admin2Keypair,  // admin
+        admin2Wallet.publicKey, // buyer
+        collection  // collection
+      ); // returns base64 string
+      console.log('signature', tx_signature)
   });
+
 });
+  
+

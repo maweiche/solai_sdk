@@ -30,9 +30,9 @@ export class Nft {
         connection: Connection,
         url: string,
         bearer: string,
-        collectionAccount: PublicKey,
-        owner: PublicKey,
-        payer: Keypair,
+        admin: Keypair,
+        collectionOwner: PublicKey,
+        buyer: PublicKey,
     ): Promise<{ tx_signature: string, nft_mint: string }>{
         try{
             const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
@@ -46,17 +46,22 @@ export class Nft {
                 },
               });
               const metadata_json = await nft_data.json(); 
-              const nft_name = metadata_json.name;
+              const areweave_metadata: any = await fetch(metadata_json.metadataUrl)
+              const areweave_json = await areweave_metadata.json()
+
+              const nft_name = areweave_json.name;
               const attributes = metadata_json.attributes.map((attr: any) => {
                 return {key: attr.trait_type, value: attr.value}
               });
-              const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionAccount.toBuffer()], program.programId)[0];
+
+
+              const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
               const nft = PublicKey.findProgramAddressSync([Buffer.from('ainft'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
               const nft_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), nft.toBuffer()], program.programId)[0];
               
               const auth = PublicKey.findProgramAddressSync([Buffer.from('auth')], program.programId)[0];
-              const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), payer.publicKey.toBuffer()], program.programId)[0];
-              let ownerNftAta = getAssociatedTokenAddressSync(nft_mint, owner, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)
+              const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), new PublicKey("6KuX26FZqzqpsHDLfkXoBXbQRPEDEbstqNiPBKHNJQ9e").toBuffer()], program.programId)[0];
+              let buyerNftAta = getAssociatedTokenAddressSync(nft_mint, buyer, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)
     
               const createNftIx = await program.methods
                 .createNft(
@@ -66,7 +71,7 @@ export class Nft {
                   attributes,
                 )
                 .accounts({
-                  admin: payer.publicKey,
+                  admin: admin.publicKey,
                   adminState,   
                   collection,
                   nft,
@@ -81,9 +86,9 @@ export class Nft {
               const transferNftIx = await program.methods
                 .transferNft()
                 .accounts({
-                  payer: payer.publicKey,
-                  buyer: owner,
-                  buyerMintAta: ownerNftAta,
+                  payer: admin.publicKey,
+                  buyer: buyer,
+                  buyerMintAta: buyerNftAta,
                   nft,
                   mint: nft_mint,
                   collection,
@@ -98,7 +103,7 @@ export class Nft {
                 const { blockhash } = await connection.getLatestBlockhash("finalized");
                 const transaction = new Transaction({
                     recentBlockhash: blockhash,
-                    feePayer: payer.publicKey,
+                    feePayer: admin.publicKey,
                 });
 
                 transaction.add(modifyComputeUnitIx).add(createNftIx).add(transferNftIx);
@@ -106,7 +111,7 @@ export class Nft {
                 const tx_signature = await sendAndConfirmTransaction(
                     connection,
                     transaction,
-                    [payer],
+                    [admin],
                     { commitment: 'confirmed', skipPreflight: true }
                 );
                 

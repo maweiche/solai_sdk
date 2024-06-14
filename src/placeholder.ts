@@ -25,13 +25,14 @@ export class Placeholder {
     public async createPlaceholder(
         connection: Connection,
         admin: Keypair,
-        buyer: PublicKey,
-        collection: PublicKey,
-        id: number,
-        uri: string,
+        collectionOwner: PublicKey, //collection owner
+        buyer: PublicKey, //buyer of nft
+        id: number, //id to track
+        uri: string, //uri of placeholder nft
     ): Promise<string>{
         try{
             const program = this.sdk.program;
+            const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
             const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
             const placeholder = PublicKey.findProgramAddressSync([Buffer.from('placeholder'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
             const placeholder_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), placeholder.toBuffer()], program.programId)[0];
@@ -97,10 +98,11 @@ export class Placeholder {
         id: number,
         admin: Keypair,
         buyer: PublicKey,
-        collection: PublicKey,
+        collectionOwner: PublicKey,
     ): Promise<{tx_signature: string}>{
         try{
             const program = this.sdk.program;
+            const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
             const placeholder = PublicKey.findProgramAddressSync([Buffer.from('placeholder'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
             const placeholder_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), placeholder.toBuffer()], program.programId)[0];
             let buyerPlaceholderAta = getAssociatedTokenAddressSync(placeholder_mint, buyer, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)

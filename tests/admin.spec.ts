@@ -27,13 +27,13 @@ anchor.setProvider(anchor.AnchorProvider.env());
 
 
 const _keypair2 = require('../test-wallet/keypair2.json')
-const adminKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
-const adminWallet = new NodeWallet(adminKeypair);
-
+const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
+const admin2Wallet = new NodeWallet(admin2Keypair);
+console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
 const _keypair3 = require('../test-wallet/keypair3.json')
-const admin2KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
-const admin2Wallet = new NodeWallet(admin2KeyPair);
-
+const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
+const admin3Wallet = new NodeWallet(admin3KeyPair);
+console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 describe("Initialize Admin", async () => {
   let sdk: SDK;
   let profilePDA: anchor.web3.PublicKey;
@@ -66,39 +66,38 @@ describe("Initialize Admin", async () => {
   }
 
  
-  // it("should initialize an admin", async () => {
-  //   sdk = new SDK(
-  //     userWallet as NodeWallet,
-  //     new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
-  //     { skipPreflight: true},
-  //     "devnet",
-  //   );
+  it("should initialize an admin", async () => {
+    sdk = new SDK(
+      userWallet as NodeWallet,
+      new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+      { skipPreflight: true},
+      "devnet",
+    );
 
-  //   const check_if_admin_fail = await sdk.admin.checkIfAdmin(
-  //     sdk.rpcConnection, // connection: Connection,
-  //     admin2Wallet.publicKey //   admin: PublicKey,
-  //   );
+    // const check_if_admin_fail = await sdk.admin.checkIfAdmin(
+    //   sdk.rpcConnection, // connection: Connection,
+    //   admin2Wallet.publicKey //   admin: PublicKey,
+    // );
 
-  //   console.log('check_if_admin_fail', check_if_admin_fail)
+    // console.log('check_if_admin_fail', check_if_admin_fail)
     
-  //   const _tx = await sdk.admin.initAdmin(
-  //     sdk.rpcConnection, // connection: Connection,
-  //     adminWallet.publicKey, //   admin: PublicKey,
-  //     "STU", //   username: string,
-  //     admin2Wallet.publicKey //   newAdmin?: PublicKey,
-  //   );
-  //   console.log('tx', _tx)  // returns base64 string
-  //   const tx = Transaction.from(Buffer.from(_tx, "base64"));
-  //   await sendAndConfirmTransaction(connection, tx, [adminWallet.payer], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
+    const _tx = await sdk.admin.initAdmin(
+      sdk.rpcConnection, // connection: Connection,
+      admin2Wallet.publicKey, //   admin: PublicKey,
+      "STU", //   username: string,
+      // admin2Wallet.publicKey //   newAdmin?: PublicKey,
+    );
+    const tx = Transaction.from(Buffer.from(_tx, "base64"));
+    await sendAndConfirmTransaction(connection, tx, [admin2Keypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
 
 
-  //   const check_if_admin_pass = await sdk.admin.checkIfAdmin(
-  //     sdk.rpcConnection, // connection: Connection,
-  //     admin2Wallet.publicKey //   admin: PublicKey,
-  //   );
+    const check_if_admin_pass = await sdk.admin.checkIfAdmin(
+      sdk.rpcConnection, // connection: Connection,
+      admin2Wallet.publicKey //   admin: PublicKey,
+    );
 
-  //   console.log('check_if_admin', check_if_admin_pass)
-  // });
+    console.log('check_if_admin', check_if_admin_pass)
+  });
 
 
 });

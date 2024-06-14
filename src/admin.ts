@@ -82,8 +82,8 @@ export class Admin {
                 .accounts({
                     admin: admin,
                     adminState: null,
-                    newAdmin: newAdmin ? newAdmin : admin,
-                    newAdminState: newAdmin ? newAdminState : adminState,
+                    newAdmin: admin,
+                    newAdminState: adminState,
                     systemProgram: SystemProgram.programId,
                 })
                 .instruction()
