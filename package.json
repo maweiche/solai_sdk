@@ -43,7 +43,8 @@
     "mocha": "^10.1.0",
     "ts-mocha": "^10.0.0",
     "tweetnacl": "^1.0.3",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "user": "^0.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.3.4",
@@ -64,6 +65,7 @@
     "build:docs": "typedoc",
     "dev": "npm run clean && tsc && cp -r src/idl/*json lib/ && tsc -w",
     "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts",
+    "test:admin": "ts-mocha -p tsconfig.json tests/admin.spec.ts",
     "test:userFlow": "ts-mocha -p tsconfig.json tests/userFlow.spec.ts",
     "test:userFlowSingleCall": "ts-mocha -p tsconfig.json tests/userFlowSingleCall.spec.ts",
     "test:inscription": "ts-mocha -p tsconfig.json tests/inscription.spec.ts"
@@ -75,7 +77,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/",
+    "registry": "https://npm.pkg.github.com",
     "@maweiche:registry": "https://npm.pkg.github.com"
   },
   "directories": {

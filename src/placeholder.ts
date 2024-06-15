@@ -39,6 +39,7 @@ export class Placeholder {
             const auth = PublicKey.findProgramAddressSync([Buffer.from('auth')], program.programId)[0];
             const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.publicKey.toBuffer()], program.programId)[0];
             let buyerPlaceholderAta = getAssociatedTokenAddressSync(placeholder_mint, buyer, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+
             const createPlaceholderIx = await program.methods
               .createPlaceholder(
                 new anchor.BN(id),
@@ -60,7 +61,7 @@ export class Placeholder {
             const transferPlaceholderIx = await program.methods
                 .buyPlaceholder()
                 .accounts({
-                    payer: buyer,
+                    payer: admin.publicKey,
                     buyer: buyer,
                     collection,
                     buyerMintAta: buyerPlaceholderAta,
@@ -77,17 +78,20 @@ export class Placeholder {
             const { blockhash } = await connection.getLatestBlockhash("finalized");
             const transaction = new Transaction({
                 recentBlockhash: blockhash,
-                feePayer: buyer,
+                feePayer: admin.publicKey,
             });
 
-            transaction.add(modifyComputeUnitIx).add(createPlaceholderIx).add(transferPlaceholderIx);
-
+            transaction
+                .add(modifyComputeUnitIx)
+                .add(createPlaceholderIx)
+                .add(transferPlaceholderIx);
+            transaction.partialSign(admin);
             const serializedTransaction = transaction.serialize({
                 requireAllSignatures: false,
               });
             const base64 = serializedTransaction.toString("base64");
-                
-            return base64;
+            const base64JSON = JSON.stringify(base64);
+            return base64JSON;
         }catch(error){
             throw new Error(`Failed to create Placeholder: ${error}`);
         }

@@ -18,23 +18,15 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, g
 import { describe, it } from "node:test";
 dotenv.config();
 
-anchor.setProvider(anchor.AnchorProvider.env());
 // anchor.setProvider(anchor.AnchorProvider.env());
-const _keypair = require('../test-wallet/keypair.json')
-const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
+const _keypair = process.env.KEYPAIR1 as any
+const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair!))
 const userWallet = new NodeWallet(userKeypair);
-anchor.setProvider(anchor.AnchorProvider.env());
 
 describe("Create a new collection and get all collections", async () => {
   let sdk: SDK;
-  let profilePDA: anchor.web3.PublicKey;
-  let postPDA: anchor.web3.PublicKey;
-  let program: anchor.Program;
-  console.log('starting')
   const wallet = userWallet;
-  const provider = anchor.getProvider();
   const connection = new Connection("https://api.devnet.solana.com", "finalized");
-  // const programId = new PublicKey("EsgdV69W9Qi6i2q6Gfus8vuy27aXwrf61gC1z1hbnr6d");
   console.log('wallet', wallet.publicKey.toBase58());
 
   // Helpers
@@ -58,7 +50,7 @@ describe("Create a new collection and get all collections", async () => {
   it("should return a list of collections", async () => {
     sdk = new SDK(
       userWallet as NodeWallet,
-      new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+      new Connection("https://api.devnet.solana.com", "confirmed"),
       { skipPreflight: true},
       "devnet",
     );
@@ -71,7 +63,7 @@ describe("Create a new collection and get all collections", async () => {
   it("should create a new collection", async () => {
     sdk = new SDK(
       userWallet as NodeWallet,
-      new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+      new Connection("https://api.devnet.solana.com", "confirmed"),
       { skipPreflight: true},
       "devnet",
     );
@@ -116,7 +108,7 @@ describe("Create a new collection and get all collections", async () => {
   it("should return a collection specific to an owner", async () => {
     sdk = new SDK(
       userWallet as NodeWallet,
-      new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+      new Connection("https://api.devnet.solana.com", "confirmed"),
       { skipPreflight: true},
       "devnet",
     );

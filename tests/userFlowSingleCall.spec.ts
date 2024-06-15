@@ -1,6 +1,6 @@
 import { SDK } from "../src";
 import * as anchor from "@project-serum/anchor";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
+import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { expect } from "chai";
 import {
   PublicKey,
@@ -18,12 +18,10 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, g
 import { describe, it } from "node:test";
 dotenv.config();
 
-anchor.setProvider(anchor.AnchorProvider.env());
-// anchor.setProvider(anchor.AnchorProvider.env());
-const _keypair = require('../test-wallet/keypair.json')
+const _keypair = process.env.KEYPAIR1 as any
 const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
 const userWallet = new NodeWallet(userKeypair);
-anchor.setProvider(anchor.AnchorProvider.env());
+
 
 describe("Typical user flow of buying an NFT", async () => {
     let sdk: SDK;
@@ -56,17 +54,17 @@ describe("Typical user flow of buying an NFT", async () => {
     it("should create a placeholder, create/transfer nft, burn placeholder", async () => {
         sdk = new SDK(
             userWallet as NodeWallet,
-            new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+            new Connection("https://api.devnet.solana.com", "confirmed"),
             { skipPreflight: true},
             "devnet",
         );
         const program = sdk.program;
-        const _keypair2 = require('../test-wallet/keypair2.json')
+        const _keypair2 = process.env.KEYPAIR2 as any;
         const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
         const admin2Wallet = new NodeWallet(admin2Keypair);
         console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
 
-        const _keypair3 = require('../test-wallet/keypair3.json')
+        const _keypair3 = process.env.KEYPAIR3 as any;
         const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
         const admin3Wallet = new NodeWallet(admin3KeyPair);
         console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());

@@ -18,16 +18,23 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, g
 import { describe, it } from "node:test";
 dotenv.config();
 
-anchor.setProvider(anchor.AnchorProvider.env());
-// anchor.setProvider(anchor.AnchorProvider.env());
-const _keypair = require('../test-wallet/keypair.json')
-const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
-const userWallet = new NodeWallet(userKeypair);
-anchor.setProvider(anchor.AnchorProvider.env());
+const _keypair = require('../test-wallet/keypair.json');
+const admin1Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
+const admin1Wallet = new NodeWallet(admin1Keypair);
+
+const _keypair2 = require('../test-wallet/keypair2.json');
+const admin2KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
+const admin2Wallet = new NodeWallet(admin2KeyPair);
+
+const _keypair3 = require('../test-wallet/keypair3.json');
+const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
+const admin3Wallet = new NodeWallet(admin3KeyPair);
+
+const buyer = admin3KeyPair;
 
 describe("Typical user flow of buying an NFT", async () => {
     let sdk: SDK;
-    const wallet = userWallet;
+    const wallet = admin1Wallet;
     const connection = new Connection("https://api.devnet.solana.com", "finalized");
     console.log('wallet', wallet.publicKey.toBase58());
 
@@ -55,45 +62,48 @@ describe("Typical user flow of buying an NFT", async () => {
 
   it("should create a placeholder, create/transfer nft, burn placeholder", async () => {
     sdk = new SDK(
-      userWallet as NodeWallet,
-      new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+      admin1Wallet as NodeWallet,
+      new Connection("https://api.devnet.solana.com", "confirmed"),
       { skipPreflight: true},
       "devnet",
     );
     const program = sdk.program;
-    const _keypair2 = require('../test-wallet/keypair2.json')
+    const _keypair2 = require('../test-wallet/keypair2.json');
     const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
     const admin2Wallet = new NodeWallet(admin2Keypair);
     console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
 
-    const _keypair3 = require('../test-wallet/keypair3.json')
+    const _keypair3 = require('../test-wallet/keypair3.json');
     const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
     const admin3Wallet = new NodeWallet(admin3KeyPair);
     console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 
     const collection_owner = admin3Wallet.publicKey;
     const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collection_owner.toBuffer()], program.programId)[0];
+    console.log('collection', collection.toBase58())
     console.log('placeholder collection owner', collection_owner.toBase58())
     const _tx = await sdk.placeholder.createPlaceholder(
       connection,  // connection: Connection,
       admin2Keypair,  // admin: Keypair,
-      admin2Wallet.publicKey,  // buyer: PublicKey,
-      collection,  // collection: PublicKey,
+      collection_owner,  // collection owner: PublicKey,
+      buyer.publicKey,  // buyer: PublicKey,
       id,  // id: number,
       "https://www.example.com" // uri: string
     ); // returns base64 string
-    const tx = Transaction.from(Buffer.from(_tx, "base64"));
-    await sendAndConfirmTransaction(connection, tx, [admin2Keypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
-
+    const _txJSON = JSON.parse(_tx);
+    const tx = Transaction.from(Buffer.from(_txJSON, "base64"))
+    const sig = await sendAndConfirmTransaction(connection, tx, [buyer, admin2KeyPair], {commitment: "confirmed", skipPreflight: true}).then(confirm).then(log);
+    console.log('signature', sig)
     
-  
+    
+
     const _create_tx = await sdk.nft.createNft(
       connection, // connection
       "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c", // url for ai image
       "ad4a356ddba9eff73cd627f69a481b8493ed975d7aac909eec4aaebdd9b506ef", // bearer
       admin2Keypair, // admin
       admin3Wallet.publicKey, // collection owner
-      admin2Wallet.publicKey, // buyer
+      buyer.publicKey, // buyer
     ); // returns base64 string
     console.log(_create_tx);
 
@@ -101,12 +111,10 @@ describe("Typical user flow of buying an NFT", async () => {
         connection, // connection
         id, // id
         admin2Keypair,  // admin
-        admin2Wallet.publicKey, // buyer
-        collection  // collection
+        buyer.publicKey, // buyer
+        collection_owner  // collection owner
       ); // returns base64 string
       console.log('signature', tx_signature)
   });
 
 });
-  
-

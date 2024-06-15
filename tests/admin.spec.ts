@@ -16,32 +16,26 @@ import {
 import dotenv from "dotenv";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { describe, it } from "node:test";
+import * as base58 from 'bs58';
 dotenv.config();
 
-anchor.setProvider(anchor.AnchorProvider.env());
 // anchor.setProvider(anchor.AnchorProvider.env());
-const _keypair = require('../test-wallet/keypair.json')
-const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
-const userWallet = new NodeWallet(userKeypair);
-anchor.setProvider(anchor.AnchorProvider.env());
+const keypair1 = process.env.KEYPAIR1 as any;
+const keypair2 = process.env.KEYPAIR2 as any;
+const keypair3 = process.env.KEYPAIR3 as any;
 
+const admin1Keypair = Keypair.fromSecretKey(base58.decode(keypair1));
+const admin2Keypair = Keypair.fromSecretKey(base58.decode(keypair2));
+const admin3KeyPair = Keypair.fromSecretKey(base58.decode(keypair3))
 
-const _keypair2 = require('../test-wallet/keypair2.json')
-const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
+const admin1Wallet = new NodeWallet(admin1Keypair);
 const admin2Wallet = new NodeWallet(admin2Keypair);
-console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
-const _keypair3 = require('../test-wallet/keypair3.json')
-const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
 const admin3Wallet = new NodeWallet(admin3KeyPair);
-console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 describe("Initialize Admin", async () => {
   let sdk: SDK;
-  let profilePDA: anchor.web3.PublicKey;
-  let postPDA: anchor.web3.PublicKey;
-  let program: anchor.Program;
+
   console.log('starting')
-  const wallet = userWallet;
-  const provider = anchor.getProvider();
+  const wallet = admin1Wallet;
   const connection = new Connection("https://api.devnet.solana.com", "finalized");
   // const programId = new PublicKey("EsgdV69W9Qi6i2q6Gfus8vuy27aXwrf61gC1z1hbnr6d");
   console.log('wallet', wallet.publicKey.toBase58());
@@ -68,8 +62,8 @@ describe("Initialize Admin", async () => {
  
   it("should initialize an admin", async () => {
     sdk = new SDK(
-      userWallet as NodeWallet,
-      new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+      admin1Wallet as NodeWallet,
+      new Connection("https://api.devnet.solana.com", "confirmed"),
       { skipPreflight: true},
       "devnet",
     );
@@ -84,8 +78,8 @@ describe("Initialize Admin", async () => {
     const _tx = await sdk.admin.initAdmin(
       sdk.rpcConnection, // connection: Connection,
       admin2Wallet.publicKey, //   admin: PublicKey,
-      "STU", //   username: string,
-      // admin2Wallet.publicKey //   newAdmin?: PublicKey,
+      "BOO", //   username: string,
+      admin3Wallet.publicKey// admin2Wallet.publicKey //   newAdmin?: PublicKey,
     );
     const tx = Transaction.from(Buffer.from(_tx, "base64"));
     await sendAndConfirmTransaction(connection, tx, [admin2Keypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);

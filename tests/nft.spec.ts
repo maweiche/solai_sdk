@@ -20,7 +20,7 @@ dotenv.config();
 
 anchor.setProvider(anchor.AnchorProvider.env());
 // anchor.setProvider(anchor.AnchorProvider.env());
-const _keypair = require('../test-wallet/keypair.json')
+const _keypair = process.env.KEYPAIR1 as any
 const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
 const userWallet = new NodeWallet(userKeypair);
 anchor.setProvider(anchor.AnchorProvider.env());
@@ -60,11 +60,11 @@ describe("Create a new ai nft", async () => {
       "devnet",
     );
     const program = sdk.program;
-    const _keypair2 = require('../test-wallet/keypair2.json')
+    const _keypair2 = process.env.KEYPAIR2 as any;
     const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
     const admin2Wallet = new NodeWallet(admin2Keypair);
 
-    const _keypair3 = require('../test-wallet/keypair3.json')
+    const _keypair3 = process.env.KEYPAIR3 as any;
     const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
     const admin3Wallet = new NodeWallet(admin3KeyPair);
     const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), userWallet.publicKey.toBuffer()], program.programId)[0];
