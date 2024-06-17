@@ -1,11 +1,11 @@
 {
-  "name": "@solai/react-sdk",
-  "version": "1.0.0",
+  "name": "@maweiche/react-sdk",
+  "version": "1.0.1",
   "license": "GPL-3.0",
   "description": "React SDK for SolAI",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maweiche/solai_sdk",
+    "url": "git+https://github.com/maweiche/solai_sdk.git",
     "directory": "/src"
   },
   "exports": {
@@ -30,7 +30,6 @@
     "@metaplex-foundation/mpl-inscription": "^0.8.1",
     "@metaplex-foundation/umi": "^0.9.2",
     "@metaplex-foundation/umi-bundle-defaults": "^0.9.2",
-    "@orca-so/sdk": "^1.2.25",
     "@project-serum/anchor": "^0.26.0",
     "@shadow-drive/sdk": "^3.3.0",
     "@solana/spl-token": "^0.4.6",
@@ -66,6 +65,7 @@
     "dev": "npm run clean && tsc && cp -r src/idl/*json lib/ && tsc -w",
     "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts",
     "test:admin": "ts-mocha -p tsconfig.json tests/admin.spec.ts",
+    "test:collection": "ts-mocha -p tsconfig.json tests/collection.spec.ts",
     "test:userFlow": "ts-mocha -p tsconfig.json tests/userFlow.spec.ts",
     "test:userFlowSingleCall": "ts-mocha -p tsconfig.json tests/userFlowSingleCall.spec.ts",
     "test:inscription": "ts-mocha -p tsconfig.json tests/inscription.spec.ts"
@@ -75,15 +75,14 @@
     "react",
     "sdk"
   ],
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com",
-    "@maweiche:registry": "https://npm.pkg.github.com"
-  },
   "directories": {
     "lib": "lib",
     "test": "tests"
   },
   "author": "Matt Weichel",
-  "types": "./lib/index.d.ts"
+  "types": "./lib/index.d.ts",
+  "bugs": {
+    "url": "https://github.com/maweiche/solai_sdk/issues"
+  },
+  "homepage": "https://github.com/maweiche/solai_sdk#readme"
 }

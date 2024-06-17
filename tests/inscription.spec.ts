@@ -18,12 +18,9 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, g
 import { describe, it } from "node:test";
 dotenv.config();
 
-anchor.setProvider(anchor.AnchorProvider.env());
-// anchor.setProvider(anchor.AnchorProvider.env());
 const _keypair = process.env.KEYPAIR1 as any
 const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
 const userWallet = new NodeWallet(userKeypair);
-anchor.setProvider(anchor.AnchorProvider.env());
 
 describe("Create a new ai nft", async () => {
   let sdk: SDK;
@@ -55,7 +52,7 @@ describe("Create a new ai nft", async () => {
   it("should create a new on chain inscription", async () => {
     sdk = new SDK(
       userWallet as NodeWallet,
-      new anchor.web3.Connection("https://api.devnet.solana.com", "confirmed"),
+      new Connection("https://api.devnet.solana.com", "confirmed"),
       { skipPreflight: true},
       "devnet",
     );

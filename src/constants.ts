@@ -2,15 +2,15 @@ import * as anchor from "@coral-xyz/anchor";
 
 export const SOL_FACTORY_PROGRAMS = {
     "mainnet-beta": new anchor.web3.PublicKey(
-      "EwaK6Cyb8phWXgEPn3xrbZLokSe1PSsDVkcCwQgs6yws"
+      "4GuhLkfXp3hJAeVrgozxhimPVvpJJ93MHpahqbnxAddG"
     ),
     devnet: new anchor.web3.PublicKey(
-      "EwaK6Cyb8phWXgEPn3xrbZLokSe1PSsDVkcCwQgs6yws"
+      "4GuhLkfXp3hJAeVrgozxhimPVvpJJ93MHpahqbnxAddG"
     ),
     localnet: new anchor.web3.PublicKey(
-      "EsgdV69W9Qi6i2q6Gfus8vuy27aXwrf61gC1z1hbnr6d"
+      "4GuhLkfXp3hJAeVrgozxhimPVvpJJ93MHpahqbnxAddG"
     ),
     testnet: new anchor.web3.PublicKey(
-      "EsgdV69W9Qi6i2q6Gfus8vuy27aXwrf61gC1z1hbnr6d"
+      "4GuhLkfXp3hJAeVrgozxhimPVvpJJ93MHpahqbnxAddG"
     ),
   };

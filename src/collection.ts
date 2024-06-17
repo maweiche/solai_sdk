@@ -1,10 +1,6 @@
-// this will
-// 1. create a new collection that can be minted from
-// 2. get collections, returns the publickey of all collections
-
 import { SDK } from ".";
 import * as anchor from "@coral-xyz/anchor";
-import { PublicKey, Transaction, Connection, SystemProgram, DataSizeFilter, GetProgramAccountsConfig } from "@solana/web3.js";
+import { PublicKey, Transaction, Connection, SystemProgram, DataSizeFilter, GetProgramAccountsConfig, MemcmpFilter } from "@solana/web3.js";
 
 export type CollectionData = {
     name: string,
@@ -45,14 +41,14 @@ export class Collection {
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), owner.toBuffer()], program.programId)[0];
 
             const collection_account = await connection.getAccountInfo(collection);
-
+            
             if(!collection_account) return null;
 
             const decode = program.coder.accounts.decode("Collection", collection_account.data);
 
             if(!decode) return null;
 
-            return decode;
+            return decode
         }catch(error){
             throw new Error(`Failed to get collection: ${error}`);
         }
@@ -62,26 +58,30 @@ export class Collection {
     ): Promise<CollectionData[]>{
         try{
             const program = this.sdk.program;
-            const size_filter: DataSizeFilter = {
-                dataSize: 302
-            };
+            const collectionRefKey = new PublicKey("mwUt7aCktvBeSm8bry6TvqEcNSUGtxByKCbBKfkxAzA");
+            const memcmp_filter: MemcmpFilter = {
+                memcmp: {
+                    offset: 8,
+                    bytes: collectionRefKey.toBase58()
+                }
+            }
 
             const get_accounts_config: GetProgramAccountsConfig = {
                 commitment: "confirmed",
-                filters: [size_filter]
+                filters: [memcmp_filter]
             };
             
             const all_collections = await connection.getProgramAccounts(
                 this.sdk.program.programId, 
                 get_accounts_config
             );
-
+            console.log('all_collections', all_collections)
             const _collections_decoded = all_collections.map((collection) => {
                   try {
                       const decode = program.coder.accounts.decode("Collection", collection.account.data);
                       console.log('decode', decode)
 
-                      if(!decode) return null;
+                      if(!decode) return;
 
                       return decode;
                   } catch (error) {
@@ -89,6 +89,7 @@ export class Collection {
                       return null;
                   }
               })
+                console.log('_collections_decoded', _collections_decoded)
             return _collections_decoded;
         }catch(error){
             throw new Error(`Failed to get collections: ${error}`);
@@ -96,6 +97,7 @@ export class Collection {
     }
     public async createCollection(
         connection: Connection,
+        reference: PublicKey,
         owner: PublicKey,
         name: string,
         symbol: string,
@@ -103,7 +105,6 @@ export class Collection {
         max_supply: anchor.BN,
         price: anchor.BN,
         stable_id: string,
-        reference: string,
         whitelist?: PublicKey[] | undefined,
         whitelist_price?: anchor.BN | undefined,
         whitelist_start_time?: anchor.BN | undefined,
@@ -111,16 +112,16 @@ export class Collection {
         try{
             const program = this.sdk.program;
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), owner.toBuffer()], program.programId)[0];
-
+            const collectionRefKey = new PublicKey("mwUt7aCktvBeSm8bry6TvqEcNSUGtxByKCbBKfkxAzA");
             const createCollectionIx = await program.methods
                 .createCollection(
+                    collectionRefKey,
                     name,
                     symbol,
                     sale_start_time,
                     max_supply,
                     price,
                     stable_id,
-                    reference,
                     whitelist,
                     whitelist_start_time,
                     whitelist_price

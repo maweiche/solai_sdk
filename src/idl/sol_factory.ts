@@ -102,6 +102,10 @@ export type SolFactory = {
       ],
       "args": [
         {
+          "name": "reference",
+          "type": "publicKey"
+        },
+        {
           "name": "name",
           "type": "string"
         },
@@ -123,10 +127,6 @@ export type SolFactory = {
         },
         {
           "name": "stableId",
-          "type": "string"
-        },
-        {
-          "name": "reference",
           "type": "string"
         },
         {
@@ -516,6 +516,10 @@ export type SolFactory = {
         "kind": "struct",
         "fields": [
           {
+            "name": "reference",
+            "type": "publicKey"
+          },
+          {
             "name": "name",
             "type": "string"
           },
@@ -545,10 +549,6 @@ export type SolFactory = {
           },
           {
             "name": "stableId",
-            "type": "string"
-          },
-          {
-            "name": "reference",
             "type": "string"
           },
           {
@@ -601,42 +601,6 @@ export type SolFactory = {
       }
     },
     {
-      "name": "CompletedPlaceholder",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "id",
-            "type": "u64"
-          },
-          {
-            "name": "collection",
-            "type": "publicKey"
-          },
-          {
-            "name": "reference",
-            "type": "string"
-          },
-          {
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "name": "price",
-            "type": "u64"
-          },
-          {
-            "name": "timeStamp",
-            "type": "i64"
-          },
-          {
-            "name": "buyer",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
       "name": "AiNft",
       "type": {
         "kind": "struct",
@@ -668,42 +632,6 @@ export type SolFactory = {
           {
             "name": "rank",
             "type": "u16"
-          }
-        ]
-      }
-    },
-    {
-      "name": "CompletedAiNft",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "id",
-            "type": "u64"
-          },
-          {
-            "name": "collection",
-            "type": "publicKey"
-          },
-          {
-            "name": "reference",
-            "type": "string"
-          },
-          {
-            "name": "price",
-            "type": "u64"
-          },
-          {
-            "name": "inscription",
-            "type": "string"
-          },
-          {
-            "name": "rank",
-            "type": "u16"
-          },
-          {
-            "name": "buyer",
-            "type": "publicKey"
           }
         ]
       }
@@ -766,6 +694,6 @@ export type SolFactory = {
     }
   ],
   "metadata": {
-    "address": "EwaK6Cyb8phWXgEPn3xrbZLokSe1PSsDVkcCwQgs6yws"
+    "address": "4GuhLkfXp3hJAeVrgozxhimPVvpJJ93MHpahqbnxAddG"
   }
 }
