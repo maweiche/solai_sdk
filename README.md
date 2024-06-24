@@ -20,11 +20,8 @@ To utilize the `sdk` you will need to import it's type and create an instance wi
 - Cluster
 
 ```tsx
-
 const keypair = Keypair.fromSecretKey(base58.decode(YOUR_BS58_SECRET_KEY));
-
 const wallet = new NodeWallet(keypair);
-
 const connection = new Connection('https://api.devnet.solana.com/', 'confirmed')
 
 const sdk = new SDK(
@@ -33,7 +30,6 @@ const sdk = new SDK(
   { skipPreflight: true},
   "devnet",
 )
-
 ```
 
 ### Collections
@@ -52,7 +48,7 @@ An Artist's Collection consists of the following data:
   stableId: string,
   reference: string,
   whitelist: {
-      wallets: PublicKey[]
+    wallets: PublicKey[]
   },
   whitelistStartTime: bigint,
   whitelistPrice: bigint
@@ -267,7 +263,7 @@ export async function POST(request: Request) {
       collectionOwner, // collection owner
       publicKey, // buyer
     );
-    console.log('nft created, proceeding to burn placeholder')
+
     await sdk.placeholder.burnPlaceholder(
       connection, // connection
       id, // id

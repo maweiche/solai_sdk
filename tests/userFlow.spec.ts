@@ -108,13 +108,14 @@ describe("Typical user flow of buying an NFT", async () => {
     console.log(_create_tx);
 
     const { tx_signature }= await sdk.placeholder.burnPlaceholder(
-        connection, // connection
-        id, // id
-        admin2Keypair,  // admin
-        buyer.publicKey, // buyer
-        collection_owner  // collection owner
-      ); // returns base64 string
-      console.log('signature', tx_signature)
+      connection, // connection
+      id, // id
+      admin2Keypair,  // admin
+      buyer.publicKey, // buyer
+      collection_owner  // collection owner
+    ); // returns base64 string
+    
+    console.log('signature', tx_signature)
   });
 
 });
