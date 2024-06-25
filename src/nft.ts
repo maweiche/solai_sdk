@@ -28,16 +28,28 @@ export class Nft {
 
     public async createNft(
         connection: Connection,
-        url: string,
         bearer: string,
         admin: Keypair,
         collectionOwner: PublicKey,
         buyer: PublicKey,
+        id: number,
     ): Promise<{ tx_signature: string, nft_mint: string }>{
         try{
             const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
-            const id = Math.floor(Math.random() * 100000);
             const program = this.sdk.program;
+            const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
+            console.log('collection owner', collectionOwner.toBase58())
+            const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
+            console.log('collection', collection.toBase58())
+            const getCollectionUrl = async (collection: PublicKey) => {
+              console.log('collection', collection.toBase58())
+              const collection_data = await connection.getAccountInfo(collection);
+              const collection_decode = program.coder.accounts.decode("Collection", collection_data!.data);
+              // console.log('collection_decode', collection_decode)
+              return collection_decode.url;
+            };
+
+            const url = await getCollectionUrl(collection);
 
             const nft_data = await fetch(url, {
                 method: 'POST',
@@ -52,17 +64,23 @@ export class Nft {
               const nft_name = areweave_json.name;
               const attributes = metadata_json.attributes.map((attr: any) => {
                 return {key: attr.trait_type, value: attr.value}
-              });
+            });
 
 
-              const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
+              
               const nft = PublicKey.findProgramAddressSync([Buffer.from('ainft'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
               const nft_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), nft.toBuffer()], program.programId)[0];
               
               const auth = PublicKey.findProgramAddressSync([Buffer.from('auth')], program.programId)[0];
-              const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), new PublicKey("6KuX26FZqzqpsHDLfkXoBXbQRPEDEbstqNiPBKHNJQ9e").toBuffer()], program.programId)[0];
-              let buyerNftAta = getAssociatedTokenAddressSync(nft_mint, buyer, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)
-    
+              const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.publicKey.toBuffer()], program.programId)[0];
+              const buyerNftAta = getAssociatedTokenAddressSync(nft_mint, buyer, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)
+
+              const placeholder = PublicKey.findProgramAddressSync([Buffer.from('placeholder'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
+              const placeholder_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), placeholder.toBuffer()], program.programId)[0];
+              console.log('placeholder to base58', placeholder.toBase58())
+              console.log('placeholder mint to base58', placeholder_mint.toBase58())
+              const buyerPlaceholderAta = getAssociatedTokenAddressSync(placeholder_mint, buyer, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+              console.log('buyerPlaceholderAta', buyerPlaceholderAta.toBase58())
               const createNftIx = await program.methods
                 .createNft(
                   new anchor.BN(id),
@@ -73,16 +91,18 @@ export class Nft {
                 .accounts({
                   admin: admin.publicKey,
                   adminState,   
-                  collection,
+                  collection: collection,
                   nft,
                   mint: nft_mint,
                   auth,
                   rent: anchor.web3.SYSVAR_RENT_PUBKEY,
                   token2022Program: TOKEN_2022_PROGRAM_ID,
+                  protocol: protocol,
                   systemProgram: SystemProgram.programId,
                 })
                 .instruction()
     
+              console.log('buyerPlaceholderAta222', buyerPlaceholderAta.toBase58())
               const transferNftIx = await program.methods
                 .transferNft()
                 .accounts({
@@ -93,9 +113,14 @@ export class Nft {
                   mint: nft_mint,
                   collection,
                   auth,
+                  buyerPlaceholderMintAta: buyerPlaceholderAta,
+                  placeholder,
+                  placeholderMint: placeholder_mint,
+                  placeholderMintAuthority: admin.publicKey,
                   associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
                   tokenProgram: TOKEN_PROGRAM_ID,
                   token2022Program: TOKEN_2022_PROGRAM_ID,
+                  protocol: protocol,
                   systemProgram: SystemProgram.programId,
                 })
                 .instruction();

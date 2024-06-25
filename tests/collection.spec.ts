@@ -65,111 +65,75 @@ describe("Create a new collection and get all collections", async () => {
     console.log('collections', _collections);
   });
 
-  // it("should create a new collection", async () => {
-  //   sdk = new SDK(
-  //     userWallet as NodeWallet,
-  //     new Connection("https://api.devnet.solana.com", "confirmed"),
-  //     { skipPreflight: true},
-  //     "devnet",
-  //   );
+  it("should create a new collection", async () => {
+    sdk = new SDK(
+      admin2Wallet as NodeWallet,
+      new Connection("https://api.devnet.solana.com", "confirmed"),
+      { skipPreflight: true},
+      "devnet",
+    );
 
-  //   const name = "Test 12 Collection";
-  //   const symbol = "TS5T";
-  //   const sale_start_time = new anchor.BN(0);
-  //   const max_supply = new anchor.BN(100);
-  //   const price = new anchor.BN(1);
-  //   const whitelist_price = new anchor.BN(0);
-  //   const stable_id = "TS2233321T";
-  //   const reference = "T1234ST123";
-  //   const date_i64 = new anchor.BN(Date.now());
-  //   const yesterday_date_i64 = new anchor.BN(Date.now() * 1000 - 86400000);
+    const name = "Test 12 Collection";
+    const symbol = "TS5T";
+    const sale_start_time = new anchor.BN(0);
+    const max_supply = new anchor.BN(100);
+    const price = new anchor.BN(1);
+    const whitelist_price = new anchor.BN(0);
+    const stable_id = "TS2233321T";
+    const date_i64 = new anchor.BN(Date.now());
+    const yesterday_date_i64 = new anchor.BN(Date.now() * 1000 - 86400000);
 
-  //   const _keypair3 = require('../test-wallet/keypair3.json')
-  //   const admin2KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
-  //   const admin2Wallet = new NodeWallet(admin2KeyPair);
-  //   console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
-  //   const _tx = await sdk.collection.createCollection(
-  //     connection, 
-  //     admin2Wallet.publicKey, 
-  //     name, 
-  //     symbol, 
-  //     date_i64,
-  //     max_supply, 
-  //     price, 
-  //     stable_id, 
-  //     reference,
-  //     [
-  //       admin2Wallet.publicKey,
-  //       new PublicKey('2UbngADg4JvCftthHoDY4gKNqsScRsQ1LLtyDqLQbWhb'),
-  //       new PublicKey('DEVJb1nq3caksGybAFxoxsYXLi9nyp8ZQnmAFmfAYMSN')
-  //     ], 
-  //     yesterday_date_i64, 
-  //     whitelist_price
-  //   );
-  //   const tx = Transaction.from(Buffer.from(_tx, "base64"));
-  //   await sendAndConfirmTransaction(connection, tx, [admin2Wallet.payer], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
-  // });
+    console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
+    const url = "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c";
+    const _tx = await sdk.collection.createCollection(
+      connection, 
+      admin2Wallet.publicKey, 
+      name, 
+      symbol, 
+      url,
+      date_i64,
+      max_supply, 
+      price, 
+      stable_id, 
+      [
+        admin2Wallet.publicKey,
+        new PublicKey('2UbngADg4JvCftthHoDY4gKNqsScRsQ1LLtyDqLQbWhb'),
+        new PublicKey('DEVJb1nq3caksGybAFxoxsYXLi9nyp8ZQnmAFmfAYMSN')
+      ], 
+      yesterday_date_i64, 
+      whitelist_price
+    );
+    const tx = Transaction.from(Buffer.from(_tx, "base64"));
+    await sendAndConfirmTransaction(connection, tx, [admin2Wallet.payer], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
+  });
 
-  // it("should return a collection specific to an owner", async () => {
-  //   sdk = new SDK(
-  //     admin2Wallet as NodeWallet,
-  //     new Connection("https://api.devnet.solana.com", "confirmed"),
-  //     { skipPreflight: true},
-  //     "devnet",
-  //   );
-  //   const owner = new PublicKey("ARTiXFSdAqtvh3MQi8GaxVa8dULaz67pwe77pGdyvkDp");
-  //   const _collection = await sdk.collection.getCollectionByOwner(connection, owner);
+  it("should return a collection specific to an owner", async () => {
+    sdk = new SDK(
+      admin2Wallet as NodeWallet,
+      new Connection("https://api.devnet.solana.com", "confirmed"),
+      { skipPreflight: true},
+      "devnet",
+    );
+    const owner = new PublicKey("ARTiXFSdAqtvh3MQi8GaxVa8dULaz67pwe77pGdyvkDp");
+    const _collection = await sdk.collection.getCollectionByOwner(connection, owner);
     
-  //   console.log('collections', _collection);
-  // });
-  // async function getAllCollections() {
-  //   const size_filter: DataSizeFilter = {
-  //     dataSize: 245
-  //   };
-  //   const get_accounts_config: GetProgramAccountsConfig = {
-  //       commitment: "confirmed",
-  //       filters: [size_filter]
-  //   };
+    console.log('collections', _collection);
+  });
+  async function getAllCollections() {
+    const size_filter: DataSizeFilter = {
+      dataSize: 245
+    };
+    const get_accounts_config: GetProgramAccountsConfig = {
+        commitment: "confirmed",
+        filters: [size_filter]
+    };
 
-  //   const all_collections = await connection.getProgramAccounts(
-  //     programId, 
-  //     get_accounts_config
-  //   );
-  //   console.log('all_collections', all_collections)
+    const all_collections = await connection.getProgramAccounts(
+      sdk.program.programId,
+      get_accounts_config
+    );
+    console.log('all_collections', all_collections)
+  }
 
-    // ex. collection:
-    // {
-  //   account: {
-  //     data: <Buffer 5b da f2 1c 8b d0 49 59 84 35 00 00 00 00 00 00 27 26 92 08 00 b7 4c a4 e3 1a 20 a2 71 97 b7 cd e0 4f 8a a9 d9 96 ac 48 35 02 41 49 9e 42 f1 c2 06 00 ... 52 more bytes>,
-  //     executable: false,
-  //     lamports: 1600800,
-  //     owner: [PublicKey [PublicKey(EsgdV69W9Qi6i2q6Gfus8vuy27aXwrf61gC1z1hbnr6d)]],
-  //     rentEpoch: 18446744073709552000,
-  //     space: 102
-  //   },
-  //   pubkey: PublicKey [PublicKey(F67Lkabu45txsmB7j6jgsac6uRT3kGCcmsR4vwK5gici)] {
-  //     _bn: <BN: d152b0b6a0ad1f2e32f18b7630b5f054483a3075c62a4864c4617fee0496a173>
-  //   }
-  // }
-
-    // for each collection we need to return the account.space and pubkey.toString()
-
-  //   const _collection_decode = all_collections.map((collection) => {
-  //       try {
-  //           const decode = program.coder.accounts.decode("collection", collection.account.data);
-  //           console.log('decode', decode)
-  //           return decode;
-  //       } catch (error) {
-  //           console.log('error', error)
-  //           return null;
-  //       }
-  //   })
-
-  //   console.log('_collection_decode', _collection_decode)
-
-  //   return all_collections;
-  // }
-
-  // getAllCollections();
   
 });

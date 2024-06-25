@@ -23,7 +23,6 @@ export class Mint {
 
     public async mint_nft(
         connection: Connection,
-        url: string,
         bearer: string,
         admin: Keypair,
         collectionOwner: PublicKey,
@@ -39,24 +38,16 @@ export class Mint {
                 collectionOwner,
                 buyer,
                 id,
-                url,
             );
+
+            console.log('placeholder created');
 
             await this.sdk.nft.createNft(
                 connection,
-                url,
                 bearer,
                 admin,
                 collectionOwner,
                 buyer,
-            );
-
-            await this.sdk.placeholder.burnPlaceholder(
-                connection,
-                id,
-                admin,
-                buyer,
-                collectionOwner,
             );
 
             return { message: "success" };

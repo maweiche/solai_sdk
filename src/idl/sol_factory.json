@@ -69,6 +69,11 @@
           "isSigner": false
         },
         {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -95,6 +100,11 @@
           "isSigner": false
         },
         {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -111,6 +121,10 @@
         },
         {
           "name": "symbol",
+          "type": "string"
+        },
+        {
+          "name": "url",
           "type": "string"
         },
         {
@@ -185,6 +199,11 @@
         },
         {
           "name": "token2022Program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "protocol",
           "isMut": false,
           "isSigner": false
         },
@@ -265,6 +284,32 @@
           "isSigner": false
         },
         {
+          "name": "buyerPlaceholderMintAta",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "placeholderMint",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "placeholderMintAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
           "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
@@ -276,6 +321,11 @@
         },
         {
           "name": "token2022Program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "protocol",
           "isMut": false,
           "isSigner": false
         },
@@ -331,6 +381,11 @@
           "isSigner": false
         },
         {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -364,6 +419,14 @@
           "name": "collection",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "collectionOwner",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
         },
         {
           "name": "buyerMintAta",
@@ -407,54 +470,7 @@
           "isSigner": false
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "burnPlaceholder",
-      "accounts": [
-        {
-          "name": "buyer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "buyerMintAta",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "CHECK"
-          ]
-        },
-        {
-          "name": "placeholder",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "placeholderMint",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "CHECK"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "token2022Program",
+          "name": "protocol",
           "isMut": false,
           "isSigner": false
         },
@@ -462,16 +478,6 @@
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mintAuthority",
-          "isMut": false,
-          "isSigner": true
         }
       ],
       "args": []
@@ -530,6 +536,10 @@
           {
             "name": "owner",
             "type": "publicKey"
+          },
+          {
+            "name": "url",
+            "type": "string"
           },
           {
             "name": "saleStartTime",
@@ -684,6 +694,17 @@
           }
         ]
       }
+    },
+    {
+      "name": "ProtocolError",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ProtocolLocked"
+          }
+        ]
+      }
     }
   ],
   "errors": [
@@ -692,8 +713,5 @@
       "name": "Unauthorized",
       "msg": "You are not authorized to perform this action"
     }
-  ],
-  "metadata": {
-    "address": "4GuhLkfXp3hJAeVrgozxhimPVvpJJ93MHpahqbnxAddG"
-  }
+  ]
 }

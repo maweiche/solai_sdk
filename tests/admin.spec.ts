@@ -93,5 +93,19 @@ describe("Initialize Admin", async () => {
     console.log('check_if_admin', check_if_admin_pass)
   });
 
+  it("should lock the protocol", async () => {
+    sdk = new SDK(
+      admin1Wallet as NodeWallet,
+      new Connection("https://api.devnet.solana.com", "confirmed"),
+      { skipPreflight: true},
+      "devnet",
+    );
 
+    const _tx = await sdk.admin.lockProtocolAccount(
+      sdk.rpcConnection, // connection: Connection,
+      admin2Wallet.publicKey //   admin: PublicKey,
+    );
+    const tx = Transaction.from(Buffer.from(_tx, "base64"));
+    await sendAndConfirmTransaction(connection, tx, [admin2Keypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
+  });
 });

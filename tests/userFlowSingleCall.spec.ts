@@ -11,15 +11,17 @@ import {
   Transaction,
   Connection,
   GetProgramAccountsConfig,
-  DataSizeFilter
+  DataSizeFilter,
+    VersionedTransaction,
 } from "@solana/web3.js";
 import dotenv from "dotenv";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { describe, it } from "node:test";
 dotenv.config();
 
-const _keypair = process.env.KEYPAIR1 as any
+const _keypair = require('../test-wallet/keypair2.json');
 const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
+console.log('userKeypair', userKeypair.publicKey.toBase58());
 const userWallet = new NodeWallet(userKeypair);
 
 
@@ -59,27 +61,46 @@ describe("Typical user flow of buying an NFT", async () => {
             "devnet",
         );
         const program = sdk.program;
-        const _keypair2 = process.env.KEYPAIR2 as any;
+        const _keypair2 = require('../test-wallet/keypair.json')
         const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
         const admin2Wallet = new NodeWallet(admin2Keypair);
         console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
 
-        const _keypair3 = process.env.KEYPAIR3 as any;
+        const _keypair3 = require('../test-wallet/keypair3.json')
         const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
         const admin3Wallet = new NodeWallet(admin3KeyPair);
         console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 
-        const collection_owner = admin3Wallet.publicKey;
+        const collection_owner = wallet.publicKey;
         const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collection_owner.toBuffer()], program.programId)[0];
-        console.log('placeholder collection owner', collection_owner.toBase58())
-        const _tx = await sdk.mint.mint_nft(
+        console.log('placeholder collection owner', collection_owner.toBase58());
+
+        const placeholder_tx = await sdk.placeholder.createPlaceholder(
+            connection,
+            userKeypair,
+            collection_owner,
+            admin2Wallet.publicKey,
+            id,
+        );
+        const tx_obj = Buffer.from(placeholder_tx, 'base64');
+        var transaction = Transaction.from(tx_obj);
+        const sig = await sendAndConfirmTransaction(
+            connection,
+            transaction,
+            [userKeypair, admin2Keypair],
+            { commitment: 'confirmed' }
+        );
+        console.log('sig placeholder', sig);
+        const _tx = await sdk.nft.createNft(
             connection,  // connection: Connection,
-            "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c", // url for ai image
             "ad4a356ddba9eff73cd627f69a481b8493ed975d7aac909eec4aaebdd9b506ef", // bearer
-            admin2Keypair, // admin
-            admin3Wallet.publicKey, // collection owner
+            userKeypair, // admin
+            collection_owner, // collection owner
             admin2Wallet.publicKey, // buyer    
+            id, // id
         ); // returns base64 string
+
+        console.log('nft tx', _tx);
     });
 
 

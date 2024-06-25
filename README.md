@@ -213,7 +213,7 @@ export async function POST(request: Request) {
     collectionOwner,
     publicKey,
     id,
-    'www.example.com'
+    'https://gateway.irys.xyz/-mpn67FnEePrsoKez4f6Dvjb1aMcH1CqCdZX0NCyHK8'
   );
 
   const tx = Transaction.from(Buffer.from(base64txn, "base64"));
@@ -230,6 +230,16 @@ export async function POST(request: Request) {
 ```
 
 #### Finalize
+
+```tsx
+// ex. response
+nft tx {
+  tx_signature: 'fcYTRbSpDRiu4HbvGPj2FXgdzZej3kPQc12HkZjBRV5VSfNbMBrfoeQYhMiH1Gss3HVy7V7vFz9cE2H5NrYNQ8c',
+  nft_mint: 'FjM7C6Xb2pVaaBQ4jhcWeBj8H7ca99mpoMDbvpeuyA17'
+}
+```
+
+
 ```tsx
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { Keypair, Connection, PublicKey } from '@solana/web3.js';

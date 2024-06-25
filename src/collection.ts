@@ -38,14 +38,14 @@ export class Collection {
     ): Promise<CollectionData | null>{
         try{
             const program = this.sdk.program;
+            
+            const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), owner.toBuffer()], program.programId)[0];
 
             const collection_account = await connection.getAccountInfo(collection);
-            
             if(!collection_account) return null;
 
             const decode = program.coder.accounts.decode("Collection", collection_account.data);
-
             if(!decode) return null;
 
             return decode
@@ -75,21 +75,20 @@ export class Collection {
                 this.sdk.program.programId, 
                 get_accounts_config
             );
-            console.log('all_collections', all_collections)
             const _collections_decoded = all_collections.map((collection) => {
-                  try {
-                      const decode = program.coder.accounts.decode("Collection", collection.account.data);
-                      console.log('decode', decode)
+                try {
+                    const decode = program.coder.accounts.decode("Collection", collection.account.data);
+                    console.log('decode', decode)
 
-                      if(!decode) return;
+                    if(!decode) return;
 
-                      return decode;
-                  } catch (error) {
-                      console.log('error', error)
-                      return null;
-                  }
-              })
-                console.log('_collections_decoded', _collections_decoded)
+                    return decode;
+                } catch (error) {
+                    console.log('error', error)
+                    return null;
+                }
+            })
+            
             return _collections_decoded;
         }catch(error){
             throw new Error(`Failed to get collections: ${error}`);
@@ -97,10 +96,10 @@ export class Collection {
     }
     public async createCollection(
         connection: Connection,
-        reference: PublicKey,
         owner: PublicKey,
         name: string,
         symbol: string,
+        url: string,
         sale_start_time: anchor.BN,
         max_supply: anchor.BN,
         price: anchor.BN,
@@ -111,6 +110,7 @@ export class Collection {
     ): Promise<string>{
         try{
             const program = this.sdk.program;
+            const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), owner.toBuffer()], program.programId)[0];
             const collectionRefKey = new PublicKey("mwUt7aCktvBeSm8bry6TvqEcNSUGtxByKCbBKfkxAzA");
             const createCollectionIx = await program.methods
@@ -118,6 +118,7 @@ export class Collection {
                     collectionRefKey,
                     name,
                     symbol,
+                    url,
                     sale_start_time,
                     max_supply,
                     price,
@@ -129,6 +130,7 @@ export class Collection {
                 .accounts({
                     owner,
                     collection,
+                    protocol: protocol,
                     systemProgram: SystemProgram.programId,
                 })
                 .instruction()

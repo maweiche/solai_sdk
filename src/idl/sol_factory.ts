@@ -69,6 +69,11 @@ export type SolFactory = {
           "isSigner": false
         },
         {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -95,6 +100,11 @@ export type SolFactory = {
           "isSigner": false
         },
         {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -111,6 +121,10 @@ export type SolFactory = {
         },
         {
           "name": "symbol",
+          "type": "string"
+        },
+        {
+          "name": "url",
           "type": "string"
         },
         {
@@ -185,6 +199,11 @@ export type SolFactory = {
         },
         {
           "name": "token2022Program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "protocol",
           "isMut": false,
           "isSigner": false
         },
@@ -265,6 +284,32 @@ export type SolFactory = {
           "isSigner": false
         },
         {
+          "name": "buyerPlaceholderMintAta",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "placeholderMint",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "placeholderMintAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
           "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
@@ -276,6 +321,11 @@ export type SolFactory = {
         },
         {
           "name": "token2022Program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "protocol",
           "isMut": false,
           "isSigner": false
         },
@@ -331,6 +381,11 @@ export type SolFactory = {
           "isSigner": false
         },
         {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -364,6 +419,14 @@ export type SolFactory = {
           "name": "collection",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "collectionOwner",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
         },
         {
           "name": "buyerMintAta",
@@ -407,54 +470,7 @@ export type SolFactory = {
           "isSigner": false
         },
         {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "burnPlaceholder",
-      "accounts": [
-        {
-          "name": "buyer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "buyerMintAta",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "CHECK"
-          ]
-        },
-        {
-          "name": "placeholder",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "placeholderMint",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "CHECK"
-          ]
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "token2022Program",
+          "name": "protocol",
           "isMut": false,
           "isSigner": false
         },
@@ -462,16 +478,6 @@ export type SolFactory = {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "mintAuthority",
-          "isMut": false,
-          "isSigner": true
         }
       ],
       "args": []
@@ -530,6 +536,10 @@ export type SolFactory = {
           {
             "name": "owner",
             "type": "publicKey"
+          },
+          {
+            "name": "url",
+            "type": "string"
           },
           {
             "name": "saleStartTime",
@@ -684,6 +694,17 @@ export type SolFactory = {
           }
         ]
       }
+    },
+    {
+      "name": "ProtocolError",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ProtocolLocked"
+          }
+        ]
+      }
     }
   ],
   "errors": [
@@ -692,8 +713,5 @@ export type SolFactory = {
       "name": "Unauthorized",
       "msg": "You are not authorized to perform this action"
     }
-  ],
-  "metadata": {
-    "address": "4GuhLkfXp3hJAeVrgozxhimPVvpJJ93MHpahqbnxAddG"
-  }
+  ]
 }

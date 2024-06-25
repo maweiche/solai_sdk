@@ -1,7 +1,3 @@
-// this will combine
-// 1. inititialize an Admin of the Program
-// 2. Get the Current Admin of the Program
-
 import { SDK } from ".";
 import { PublicKey, Transaction, Connection, SystemProgram, MemcmpFilter, DataSizeFilter, GetProgramAccountsConfig } from "@solana/web3.js";
 
@@ -74,6 +70,7 @@ export class Admin {
     ): Promise<string>{
         try{
             const program = this.sdk.program;
+            const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.toBuffer()], program.programId)[0];
             const newAdminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), newAdmin ? newAdmin.toBuffer() : admin.toBuffer()], program.programId)[0];
 
@@ -84,6 +81,7 @@ export class Admin {
                     adminState: null,
                     newAdmin: admin,
                     newAdminState: adminState,
+                    protocol: protocol,
                     systemProgram: SystemProgram.programId,
                 })
                 .instruction()
@@ -107,5 +105,75 @@ export class Admin {
         }
     }
 
-    public async getAdmin(){};
+    public async initProtocolAccount(
+        connection: Connection,
+        admin: PublicKey,
+    ):Promise<string>{
+        try{
+            const program = this.sdk.program;
+            const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
+
+            const createAdminIx = await program.methods
+                .intializeProtocolAccount()
+                .accounts({
+                    admin: admin,
+                    protocol: protocol,
+                    systemProgram: SystemProgram.programId,
+                })
+                .instruction()
+
+            const { blockhash } = await connection.getLatestBlockhash("finalized");
+            const transaction = new Transaction({
+                recentBlockhash: blockhash,
+                feePayer: admin,
+            });
+
+            transaction.add(createAdminIx);
+
+            const serializedTransaction = transaction.serialize({
+                requireAllSignatures: false,
+              });
+            const base64 = serializedTransaction.toString("base64");
+                
+            return base64
+        } catch (error) {
+            throw new Error(`Failed to create NFT: ${error}`);
+        }
+    };
+
+    public async lockProtocolAccount(
+        connection: Connection,
+        admin: PublicKey,
+    ):Promise<string>{
+        try{
+            const program = this.sdk.program;
+            const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
+
+            const createAdminIx = await program.methods
+                .lockProtocol()
+                .accounts({
+                    admin: admin,
+                    protocol: protocol,
+                    systemProgram: SystemProgram.programId,
+                })
+                .instruction()
+
+            const { blockhash } = await connection.getLatestBlockhash("finalized");
+            const transaction = new Transaction({
+                recentBlockhash: blockhash,
+                feePayer: admin,
+            });
+
+            transaction.add(createAdminIx);
+
+            const serializedTransaction = transaction.serialize({
+                requireAllSignatures: false,
+              });
+            const base64 = serializedTransaction.toString("base64");
+                
+            return base64
+        } catch (error) {
+            throw new Error(`Failed to create NFT: ${error}`);
+        }
+    };
 };
