@@ -7,7 +7,7 @@
 
 import { SDK } from ".";
 import * as anchor from "@coral-xyz/anchor";
-import { PublicKey, Transaction, Connection, ComputeBudgetProgram, SystemProgram, sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
+import { PublicKey, Transaction, Connection, ComputeBudgetProgram, SystemProgram, sendAndConfirmTransaction, Keypair, TransactionInstruction } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 export class Placeholder {
@@ -28,7 +28,11 @@ export class Placeholder {
         collectionOwner: PublicKey, //collection owner
         buyer: PublicKey, //buyer of nft
         id: number, //id to track
-    ): Promise<any>{
+    ): Promise<{ 
+        // tx_signature: string, 
+        // nft_mint: string 
+        instructions: any
+      }>{
         try{
             const program = this.sdk.program;
             const uri = "https://gateway.irys.xyz/-mpn67FnEePrsoKez4f6Dvjb1aMcH1CqCdZX0NCyHK8";
@@ -82,24 +86,30 @@ export class Placeholder {
                 })
                 .instruction()
                 
-            const { blockhash } = await connection.getLatestBlockhash("finalized");
-            const transaction = new Transaction({
-                recentBlockhash: blockhash,
-                feePayer: admin.publicKey,
-            });
+            // const { blockhash } = await connection.getLatestBlockhash("finalized");
+            // const transaction = new Transaction({
+            //     recentBlockhash: blockhash,
+            //     feePayer: admin.publicKey,
+            // });
 
-            transaction
-                .add(modifyComputeUnitIx)
-                .add(createPlaceholderIx)
-                .add(transferPlaceholderIx);
-            transaction.partialSign(admin);
-            const serializedTransaction = transaction.serialize({
-                requireAllSignatures: false,
-              });
-            const base64 = serializedTransaction.toString("base64");
-            const base64JSON = JSON.stringify(base64);
+            // transaction
+            //     .add(modifyComputeUnitIx)
+            //     .add(createPlaceholderIx)
+            //     .add(transferPlaceholderIx);
+            // transaction.partialSign(admin);
+            // const serializedTransaction = transaction.serialize({
+            //     requireAllSignatures: false,
+            //   });
+            // const base64 = serializedTransaction.toString("base64");
+            // const base64JSON = JSON.stringify(base64);
 
-            return base64JSON;
+            // return base64JSON;
+
+            const instructions: TransactionInstruction[] = [createPlaceholderIx, transferPlaceholderIx];
+
+            return {
+                instructions: instructions
+            }
         }catch(error){
             throw new Error(`Failed to create Placeholder: ${error}`);
         }

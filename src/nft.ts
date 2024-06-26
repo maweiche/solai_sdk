@@ -6,7 +6,7 @@
 import { SDK } from ".";
 import * as anchor from "@coral-xyz/anchor";
 import sol_factory_idl from "src/idl/sol_factory.json";
-import { PublicKey, Transaction, Connection, ComputeBudgetProgram, SystemProgram, sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
+import { PublicKey, Transaction, Connection, ComputeBudgetProgram, SystemProgram, sendAndConfirmTransaction, Keypair, TransactionInstruction } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 export class Nft {
@@ -33,9 +33,13 @@ export class Nft {
         collectionOwner: PublicKey,
         buyer: PublicKey,
         id: number,
-    ): Promise<{ tx_signature: string, nft_mint: string }>{
+    ): Promise<{ 
+        // tx_signature: string, 
+        // nft_mint: string 
+        instructions: any
+      }>{
         try{
-            const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
+            const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 600_000 });
             const program = this.sdk.program;
             const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             console.log('collection owner', collectionOwner.toBase58())
@@ -125,24 +129,26 @@ export class Nft {
                 })
                 .instruction();
 
-                const { blockhash } = await connection.getLatestBlockhash("finalized");
-                const transaction = new Transaction({
-                    recentBlockhash: blockhash,
-                    feePayer: admin.publicKey,
-                });
+                // const { blockhash } = await connection.getLatestBlockhash("finalized");
+                // const transaction = new Transaction({
+                //     recentBlockhash: blockhash,
+                //     feePayer: admin.publicKey,
+                // });
 
-                transaction.add(modifyComputeUnitIx).add(createNftIx).add(transferNftIx);
+                // transaction.add(modifyComputeUnitIx).add(createNftIx).add(transferNftIx);
 
-                const tx_signature = await sendAndConfirmTransaction(
-                    connection,
-                    transaction,
-                    [admin],
-                    { commitment: 'confirmed', skipPreflight: true }
-                );
+                // const tx_signature = await sendAndConfirmTransaction(
+                //     connection,
+                //     transaction,
+                //     [admin],
+                //     { commitment: 'confirmed', skipPreflight: true }
+                // );
                 
+                const instructions: TransactionInstruction[] = [modifyComputeUnitIx, createNftIx, transferNftIx];
             return {
-                tx_signature: tx_signature,
-                nft_mint: nft_mint.toString(),
+                // tx_signature: tx_signature,
+                // nft_mint: nft_mint.toString(),
+                instructions: instructions
             }
         } catch (error) {
             throw new Error(`Failed to create NFT: ${error}`);

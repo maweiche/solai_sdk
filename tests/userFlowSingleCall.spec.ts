@@ -82,15 +82,9 @@ describe("Typical user flow of buying an NFT", async () => {
             admin2Wallet.publicKey,
             id,
         );
-        const tx_obj = Buffer.from(placeholder_tx, 'base64');
-        var transaction = Transaction.from(tx_obj);
-        const sig = await sendAndConfirmTransaction(
-            connection,
-            transaction,
-            [userKeypair, admin2Keypair],
-            { commitment: 'confirmed' }
-        );
-        console.log('sig placeholder', sig);
+
+        const transaction = new Transaction();
+        
         const _tx = await sdk.nft.createNft(
             connection,  // connection: Connection,
             "ad4a356ddba9eff73cd627f69a481b8493ed975d7aac909eec4aaebdd9b506ef", // bearer
@@ -100,7 +94,22 @@ describe("Typical user flow of buying an NFT", async () => {
             id, // id
         ); // returns base64 string
 
-        console.log('nft tx', _tx);
+        transaction.add(
+            ...placeholder_tx.instructions,
+            ..._tx.instructions
+        )
+
+        
+
+
+        const sig = await sendAndConfirmTransaction(
+            connection,
+            transaction,
+            [userKeypair, admin2Keypair],
+            { commitment: 'confirmed' }
+        );
+
+        console.log('sig placeholder', sig);
     });
 
 
