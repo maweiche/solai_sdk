@@ -28,7 +28,7 @@ const userWallet = new NodeWallet(userKeypair);
 describe("Typical user flow of buying an NFT", async () => {
     let sdk: SDK;
     const wallet = userWallet;
-    const connection = new Connection("https://api.devnet.solana.com", "finalized");
+    const connection = new Connection("http://localhost:8899 ", "finalized");
     console.log('wallet', wallet.publicKey.toBase58());
 
     // Helpers
@@ -64,14 +64,14 @@ describe("Typical user flow of buying an NFT", async () => {
         const _keypair2 = require('../test-wallet/keypair.json')
         const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
         const admin2Wallet = new NodeWallet(admin2Keypair);
-        console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
+        console.log('admin2Wallet***********', admin2Wallet.publicKey.toBase58());
 
         const _keypair3 = require('../test-wallet/keypair3.json')
         const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
         const admin3Wallet = new NodeWallet(admin3KeyPair);
         console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 
-        const collection_owner = wallet.publicKey;
+        const collection_owner = admin3Wallet.publicKey;
         const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collection_owner.toBuffer()], program.programId)[0];
         console.log('placeholder collection owner', collection_owner.toBase58());
 

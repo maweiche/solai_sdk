@@ -31,7 +31,7 @@ export class Placeholder {
     ): Promise<{ 
         // tx_signature: string, 
         // nft_mint: string 
-        instructions: any
+        instructions: TransactionInstruction[]
       }>{
         try{
             const program = this.sdk.program;
@@ -70,8 +70,8 @@ export class Placeholder {
             const transferPlaceholderIx = await program.methods
                 .buyPlaceholder()
                 .accounts({
-                    payer: admin.publicKey,
                     buyer: buyer,
+                    payer: admin.publicKey,
                     collection,
                     collectionOwner: collectionOwner,
                     buyerMintAta: buyerPlaceholderAta,

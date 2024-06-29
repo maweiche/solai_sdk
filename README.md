@@ -1,17 +1,50 @@
-# Sol AI SDK
+# SolAi - Solana Program SDK
+A SDK built for use in correlation with the [Sol Factory](https://github.com/maweiche/sol_factory) Solana program.
 
-## Installation
+Below you can find instructions on using the SDK locally followed by a deeper dive into the SDK's structure and details.
+
+> [!WARNING]  
+> SolAi-SDK is still in development and is unstable, there can be minor and major changes at any time.
+
+## Program ID
+| Cluster      | Program Id |
+| :---        |    :----:   |
+| **Localnet**     | `4Fj9kuGYLye3pwCBYaXbuzocEy22gPWT5TcJVJ6JauUt` |
+| **Devnet**  | `4Fj9kuGYLye3pwCBYaXbuzocEy22gPWT5TcJVJ6JauUt` |
+| **Mainnet**  | ``  |
+
+## Description
+
+The Sol Factory program is structured for Artists to create on-chain `Collections` that a user can mint a Token-2022 `NFT` from on the Solana blockchain.
+
+The Solana Factory program was built for use with the [Sol Ai SDK](https://npmjs.com).
+
+You can view a baremetal combination of the Program and SDK live on Devnet [here]().
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/en/)
+- [Anchor](https://www.anchor-lang.com/)
+- [Solana CLI](https://docs.solanalabs.com/cli/install)
+- [Solana Wallet](https://docs.solanalabs.com/cli/wallets/paper)
+
+***For testing purposes it is advised to use at least three developer wallets (Admin, Artist, User)***
+
+### Installation
 
 ```bash
 npm install @maweiche/react-sdk
 ```
 
-## Documentation
+### Documentation
 
 For more detailed documentation, please visit the [SolAI documentation](https://docs.com/).
 
-## Usage
-**Because SDK instances require Keypair usage all examples are for backend use**
+### Usage
+> **🚨 Important Notes**
+> **Because SDK instances require Keypair usage all examples are for backend use**
 
 To utilize the `sdk` you will need to import it's type and create an instance with the following to start:
 - Wallet
@@ -181,7 +214,8 @@ For this API route example we broke this process down into two routes - `mint` a
 
 The `mint` route returns a transaction to be signed by the user while the `finalize` returns a transaction signature since the admin wallet is paying for the nft transfer/creation after the AI Image Generation is complete.
 
-🚨**to prevent unauthorized calls to these functions, they require an admin signature**🚨
+> **🚨 Important Notes**
+> **to prevent unauthorized calls to these functions, they require an admin signature**
 
 #### Mint
 ```tsx
@@ -302,3 +336,7 @@ We welcome contributions to improve the SDK. Please raise an issue or submit a p
 
 The SolAI SDK is licensed under the [GNU General Public License v3.0](https://github.com/maweiche).
 
+
+
+## TO DO
+- AIRDROP AS COLLECTION OWNER FN

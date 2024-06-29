@@ -1,6 +1,6 @@
 {
   "name": "@maweiche/react-sdk",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "license": "GPL-3.0",
   "description": "React SDK for SolAI",
   "repository": {
