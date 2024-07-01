@@ -3,7 +3,7 @@ export type SolFactory = {
   "name": "sol_factory",
   "instructions": [
     {
-      "name": "intializeProtocolAccount",
+      "name": "initializeProtocolAccount",
       "accounts": [
         {
           "name": "admin",
@@ -90,6 +90,11 @@ export type SolFactory = {
       "name": "createCollection",
       "accounts": [
         {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
           "name": "owner",
           "isMut": true,
           "isSigner": true
@@ -97,6 +102,11 @@ export type SolFactory = {
         {
           "name": "collection",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "adminState",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -142,20 +152,6 @@ export type SolFactory = {
         {
           "name": "stableId",
           "type": "string"
-        },
-        {
-          "name": "whitelist",
-          "type": {
-            "vec": "publicKey"
-          }
-        },
-        {
-          "name": "whitelistStartTime",
-          "type": "i64"
-        },
-        {
-          "name": "whitelistPrice",
-          "type": "u64"
         }
       ]
     },
@@ -481,6 +477,91 @@ export type SolFactory = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "airdropPlaceholder",
+      "accounts": [
+        {
+          "name": "buyer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collectionOwner",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "buyerMintAta",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "placeholder",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "CHECK"
+          ]
+        },
+        {
+          "name": "auth",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "token2022Program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructions",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -560,20 +641,6 @@ export type SolFactory = {
           {
             "name": "stableId",
             "type": "string"
-          },
-          {
-            "name": "whitelist",
-            "type": {
-              "defined": "WhiteList"
-            }
-          },
-          {
-            "name": "whitelistStartTime",
-            "type": "i64"
-          },
-          {
-            "name": "whitelistPrice",
-            "type": "u64"
           }
         ]
       }
@@ -634,14 +701,6 @@ export type SolFactory = {
           {
             "name": "timeStamp",
             "type": "i64"
-          },
-          {
-            "name": "inscription",
-            "type": "string"
-          },
-          {
-            "name": "rank",
-            "type": "u16"
           }
         ]
       }
@@ -691,6 +750,9 @@ export type SolFactory = {
           },
           {
             "name": "NotInWhitelist"
+          },
+          {
+            "name": "WalletDoesNotMatch"
           }
         ]
       }
@@ -702,6 +764,12 @@ export type SolFactory = {
         "variants": [
           {
             "name": "ProtocolLocked"
+          },
+          {
+            "name": "UnauthorizedAdmin"
+          },
+          {
+            "name": "InstructionsNotCorrect"
           }
         ]
       }

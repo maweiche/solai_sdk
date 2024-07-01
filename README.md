@@ -10,7 +10,7 @@ Below you can find instructions on using the SDK locally followed by a deeper di
 | Cluster      | Program Id |
 | :---        |    :----:   |
 | **Localnet**     | `4Fj9kuGYLye3pwCBYaXbuzocEy22gPWT5TcJVJ6JauUt` |
-| **Devnet**  | `4Fj9kuGYLye3pwCBYaXbuzocEy22gPWT5TcJVJ6JauUt` |
+| **Devnet**  | `6rHuJFF9XCxi9eDHtgJPcBKNpMWyBHhQhrFSkUD5XMYo` |
 | **Mainnet**  | ``  |
 
 ## Description
@@ -89,8 +89,8 @@ An Artist's Collection consists of the following data:
 ```
 
 Collections can be fetched two ways:
-- All (returns every collection)
-- By Collection Owner (Artist's Wallet Address)
+- **All** - returns every collection
+- **Collection Owner** - Artist's Wallet Address
 
 ```tsx
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
@@ -210,7 +210,9 @@ After a user selects an available Collection they are able to Mint a NFT from th
 - Once the transaction is approved and confirmed the AI Image Generation begins
 - Upon completion of the AI Image Generation a new NFT (Token 2022) is created and sent directly to the User while simultaneously Burning their Placeholder NFT.
 
-For this API route example we broke this process down into two routes - `mint` and `finalize`.
+For this API route example we broke this process down into two routes:
+- `mint` - returns a base64 encoded transaction
+- `finalize` - returns a base64 encoded transaction
 
 The `mint` route returns a transaction to be signed by the user while the `finalize` returns a transaction signature since the admin wallet is paying for the nft transfer/creation after the AI Image Generation is complete.
 
@@ -242,9 +244,9 @@ export async function POST(request: Request) {
   )
 
   const base64txn = await sdk.placeholder.createPlaceholder(
-    connection,
-    keypair,
-    collectionOwner,
+    sdk.rpcConnection, // rpc connection
+    admin, // keypair
+    collectionOwner, // collection owner publickey
     publicKey,
     id,
     'https://gateway.irys.xyz/-mpn67FnEePrsoKez4f6Dvjb1aMcH1CqCdZX0NCyHK8'
@@ -335,8 +337,3 @@ We welcome contributions to improve the SDK. Please raise an issue or submit a p
 ## License
 
 The SolAI SDK is licensed under the [GNU General Public License v3.0](https://github.com/maweiche).
-
-
-
-## TO DO
-- AIRDROP AS COLLECTION OWNER FN
