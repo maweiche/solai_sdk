@@ -36,7 +36,7 @@ export class Nft {
     ): Promise<{ 
         // tx_signature: string, 
         // nft_mint: string 
-        instructions: any
+        instructions: TransactionInstruction[]
       }>{
         try{
             const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 600_000 });
@@ -50,7 +50,7 @@ export class Nft {
             };
 
             const url = await getCollectionUrl(collection);
-
+            console.log('url', url)
             const nft_data = await fetch(url, {
                 method: 'POST',
                 headers: {

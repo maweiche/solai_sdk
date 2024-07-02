@@ -13,10 +13,8 @@ import {
   GetProgramAccountsConfig,
   DataSizeFilter
 } from "@solana/web3.js";
-import dotenv from "dotenv";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { describe, it } from "node:test";
-dotenv.config();
 
 const _keypair2 = require('../test-wallet/keypair2.json');
 const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
@@ -86,7 +84,7 @@ describe("Create a new collection and get all collections", async () => {
     console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
     const url = "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c";
     const _tx = await sdk.collection.createCollection(
-      connection, 
+      admin2Wallet.publicKey, 
       admin2Wallet.publicKey, 
       name, 
       symbol, 
@@ -94,16 +92,9 @@ describe("Create a new collection and get all collections", async () => {
       date_i64,
       max_supply, 
       price, 
-      stable_id, 
-      [
-        admin2Wallet.publicKey,
-        new PublicKey('2UbngADg4JvCftthHoDY4gKNqsScRsQ1LLtyDqLQbWhb'),
-        new PublicKey('DEVJb1nq3caksGybAFxoxsYXLi9nyp8ZQnmAFmfAYMSN')
-      ], 
-      yesterday_date_i64, 
-      whitelist_price
+      stable_id,
     );
-    const tx = Transaction.from(Buffer.from(_tx, "base64"));
+    const tx = new Transaction().add(_tx.instructions[0]);
     await sendAndConfirmTransaction(connection, tx, [admin2Wallet.payer], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
   });
 

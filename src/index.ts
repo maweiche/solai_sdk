@@ -10,7 +10,6 @@ import { Admin } from "./admin";
 import { Collection } from "./collection";
 import { Nft } from "./nft";
 import { Placeholder } from "./placeholder";
-import { Inscription } from "./inscription";
 import { Mint } from "./mint";
 
 export {
@@ -48,6 +47,5 @@ export class SDK {
   public collection = new Collection(this);
   public nft = new Nft(this);
   public placeholder = new Placeholder(this);
-  public inscription = new Inscription(this);
   public mint = new Mint(this);
 }

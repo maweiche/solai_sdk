@@ -65,7 +65,7 @@ const sdk = new SDK(
 )
 ```
 
-### Collections
+## Collections
 
 An Artist's Collection consists of the following data:
 
@@ -201,7 +201,7 @@ export async function POST(request: Request) {
 
 ```
 
-### Minting NFTs
+## Minting NFTs
 
 After a user selects an available Collection they are able to Mint a NFT from that Collection. Because the AI Image Generation will not return instanaeously, we have built the following flow for the minting process:
 
@@ -219,6 +219,8 @@ The `mint` route returns a transaction to be signed by the user while the `final
 > **🚨 Important Notes**
 > **to prevent unauthorized calls to these functions, they require an admin signature**
 
+### Standard Flow
+
 #### Mint
 ```tsx
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
@@ -235,7 +237,6 @@ export async function POST(request: Request) {
 
   const keypair = Keypair.fromSecretKey(base58.decode(YOUR_BS58_SECRET_KEY));
   const wallet = new NodeWallet(keypair);
-  const connection = new Connection('https://api.devnet.solana.com/', 'confirmed')
   const sdk = new SDK(
     wallet,
     connection,
@@ -243,25 +244,18 @@ export async function POST(request: Request) {
     "devnet",
   )
 
-  const base64txn = await sdk.placeholder.createPlaceholder(
-    sdk.rpcConnection, // rpc connection
-    admin, // keypair
+  const instructions = await sdk.placeholder.createPlaceholder(
+    admin.publickey, // publickey
     collectionOwner, // collection owner publickey
     publicKey,
     id,
     'https://gateway.irys.xyz/-mpn67FnEePrsoKez4f6Dvjb1aMcH1CqCdZX0NCyHK8'
   );
 
-  const tx = Transaction.from(Buffer.from(base64txn, "base64"));
-  tx.partialSign(keypair);
 
-  const serializedTransaction = tx.serialize({
-    requireAllSignatures: false,
-  });
-  const base64 = serializedTransaction.toString("base64");
-  const base64JSON = JSON.stringify(base64);
-
-  return new Response(base64JSON, { status: 200 });
+  return new Response(JSON.stringify({
+    instructions: instructions
+  }), { status: 200 });
   }
 ```
 
@@ -325,6 +319,74 @@ export async function POST(request: Request) {
   }
 }
 ```
+
+### Airdrop Placeholder as Collection Owner
+```tsx
+import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import { Keypair, Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { SDK } from '@maweiche/react-sdk';
+import base58, * as bs58 from "bs58";
+import dotenv from 'dotenv';
+dotenv.config()
+export async function POST(request: Request) {
+  const body = await request.json();
+  const id = body.id;
+  const collectionOwner = new PublicKey(body.collectionOwner);
+  const publicKey = new PublicKey(body.publicKey);
+
+  const program = this.sdk.program;
+  const uri = "https://gateway.irys.xyz/-mpn67FnEePrsoKez4f6Dvjb1aMcH1CqCdZX0NCyHK8";
+  const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
+  const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
+
+  const keypair = Keypair.fromSecretKey(base58.decode(YOUR_BS58_SECRET_KEY));
+  const wallet = new NodeWallet(keypair);
+  const sdk = new SDK(
+    wallet,
+    connection,
+    { skipPreflight: true},
+    "devnet",
+  )
+
+  // airdrop placeholder to buyer special instructions
+    const ed25519Ix = Ed25519Program.createInstructionWithPrivateKey({
+      privateKey: collection_wallet.secretKey,
+      message: buyer.publicKey.toBuffer(),
+    });
+
+  const airdropPlaceholderIx = await program.methods
+    .airdropPlaceholder()
+    .accounts({
+        buyer: buyer,
+        payer: admin,
+        collection,
+        collectionOwner: collectionOwner,
+        buyerMintAta: buyerPlaceholderAta,
+        placeholder,
+        mint: placeholder_mint,
+        auth,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        token2022Program: TOKEN_2022_PROGRAM_ID,
+        protocol: protocol,
+        systemProgram: SystemProgram.programId,
+    })
+    .instruction()
+
+  const instructions = [ed25519Ix, airdropPlaceholderIx]
+
+  return new Response(JSON.stringify({
+    instructions: instructions
+  }), { status: 200 });
+  }
+```
+
+### Building a Blink Url API Route
+
+```ts
+
+```
+
 
 ## App
 

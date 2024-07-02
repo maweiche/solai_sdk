@@ -34,7 +34,7 @@ export class Mint {
 
             await this.sdk.placeholder.createPlaceholder(
                 connection,
-                admin,
+                admin.publicKey,
                 collectionOwner,
                 buyer,
                 id,
@@ -45,9 +45,10 @@ export class Mint {
             await this.sdk.nft.createNft(
                 connection,
                 bearer,
-                admin,
+                admin.publicKey,
                 collectionOwner,
                 buyer,
+                id,
             );
 
             return { message: "success" };

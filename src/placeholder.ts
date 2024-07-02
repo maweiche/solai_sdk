@@ -23,7 +23,6 @@ export class Placeholder {
      */
 
     public async createPlaceholder(
-        connection: Connection,
         admin: PublicKey,
         collectionOwner: PublicKey, //collection owner
         buyer: PublicKey, //buyer of nft
@@ -116,7 +115,6 @@ export class Placeholder {
     };
 
     public async airdropPlaceholder(
-        connection: Connection,
         admin: PublicKey,
         collectionOwner: PublicKey, //collection owner
         buyer: PublicKey, //buyer of nft

@@ -114,7 +114,7 @@ export class Admin {
             const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
 
             const createAdminIx = await program.methods
-                .intializeProtocolAccount()
+                .initializeProtocolAccount()
                 .accounts({
                     admin: admin,
                     protocol: protocol,
