@@ -13,6 +13,7 @@ import {
   GetProgramAccountsConfig,
   DataSizeFilter,
     VersionedTransaction,
+    Ed25519Program
 } from "@solana/web3.js";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { describe, it } from "node:test";
@@ -58,8 +59,9 @@ describe("Typical flow of collection owner airdropping a Placeholder and User tr
             { skipPreflight: true},
             "devnet",
         );
+        const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
         const program = sdk.program;
-        const _keypair2 = require('../test-wallet/keypair.json')
+        const _keypair2 = require('../test-wallet/keypair2.json')
         const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
         const admin2Wallet = new NodeWallet(admin2Keypair);
         console.log('admin2Wallet***********', admin2Wallet.publicKey.toBase58());
@@ -68,28 +70,31 @@ describe("Typical flow of collection owner airdropping a Placeholder and User tr
         const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
         const admin3Wallet = new NodeWallet(admin3KeyPair);
         console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
-
-        const collection_owner = admin3Wallet.publicKey;
+        const buyer = userWallet.publicKey;
+        const collection_owner = admin2Wallet.publicKey;
         const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collection_owner.toBuffer()], program.programId)[0];
         console.log('placeholder collection owner', collection_owner.toBase58());
 
-        const placeholder_tx = await sdk.placeholder.airdropPlaceholder(
+        
+
+
+        const airdrop_tx = await sdk.placeholder.airdropPlaceholder(
             userKeypair,
             collection_owner,
-            admin2Wallet.publicKey,
+            buyer,
             id,
         );
 
         const transaction = new Transaction();
 
         transaction.add(
-            ...placeholder_tx.instructions,
+            ...airdrop_tx.instructions
         )
 
         const sig = await sendAndConfirmTransaction(
             connection,
             transaction,
-            [userKeypair, admin3Wallet.payer, admin2Keypair],
+            [userKeypair, admin2Keypair],
             { commitment: 'confirmed' }
         );
 

@@ -306,7 +306,7 @@ export type SolFactory = {
         },
         {
           "name": "collection",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -845,6 +845,6 @@ export type SolFactory = {
     }
   ],
   "metadata": {
-    "address": "DHHnPaKKDLadRHLqVHWf2YpuK5Y6guJio99pD5sh2GVD"
+    "address": "HQy5LL9S5P1J5H6vThLybsyNNexm4McoctPVUhMbtkDC"
   }
 }

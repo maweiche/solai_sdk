@@ -82,7 +82,7 @@ describe("Create a new collection and get all collections", async () => {
     const end_date_i64 = new anchor.BN(Date.now() + 86400000); // 24 hours
 
     console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
-    const url = "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c";
+    const url = "https://amin.stable-dilution.art/nft/item/generation/3";
     const _tx = await sdk.collection.createCollection(
       admin2Keypair, 
       admin2Wallet.publicKey, 

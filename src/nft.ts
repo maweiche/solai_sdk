@@ -42,6 +42,7 @@ export class Nft {
 
             const placeholder_metadata = await getTokenMetadata(connection, placeholderMint);            
             const additional_metadata = placeholder_metadata.additionalMetadata;
+            console.log('placeholder metadata', additional_metadata)
             const id = additional_metadata[0][1];
             const count = additional_metadata[1][1];
 
@@ -58,6 +59,7 @@ export class Nft {
             
             // BEGIN THE NFT CREATION
             const url_as_string = `${url}/${count}/${buyer.toBase58()}`
+            console.log('URL TO POLL: ', bearer)
             const nft_data = await fetch(url_as_string, {
               method: 'POST',
               headers: {
@@ -65,27 +67,27 @@ export class Nft {
               },
             });
 
-
+            console.log('nft_data', nft_data)
             const metadata_json = await nft_data.json(); 
+            console.log('metadata_json', metadata_json)
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            let arweave_metadata;
+            arweave_metadata = await fetch(metadata_json.metadataUrl)
 
-              let retries = 0;
-              let arweave_metadata;
-              while (retries < 3) {
-                try {
-                  arweave_metadata = await fetch(metadata_json.metadataUrl)
-                  break;
-                } catch (error) {
-                  console.log('error fetching metadata', error)
-                  retries++;
-                  await new Promise(resolve => setTimeout(resolve, 2000));
-                }
-              }
-              if (retries === 3) {
-                throw new Error('Failed to fetch metadata from arweave')
-              }
+            console.log('arweave_metadata', arweave_metadata)
 
+            let retries = 0;
+            while(arweave_metadata.status !== 200 && retries < 5){
+              await new Promise(resolve => setTimeout(resolve, 3000));
+              arweave_metadata = await fetch(metadata_json.metadataUrl);
+              retries++;
+            }
+            if(arweave_metadata.status !== 200){
+              throw new Error(`Failed to fetch metadata from Arweave: ${arweave_metadata.status}`);
+            }
+            
               const arweave_json = await arweave_metadata.json()
-
+              
               const nft_name = arweave_json.name;
               const attributes = metadata_json.attributes.map((attr: any) => {
                 return {key: attr.trait_type, value: attr.value}
@@ -154,15 +156,15 @@ export class Nft {
                 );
 
                 const _sig = await sendAndConfirmTransaction(
-                    connection,
-                    txn,
-                    [admin],
-                    { commitment: 'confirmed' }
+                  connection,
+                  txn,
+                  [admin],
+                  { commitment: 'confirmed' }
                 );
 
             return {
-                tx_signature: _sig,
-                nft_mint: nft_mint.toBase58()
+              tx_signature: _sig,
+              nft_mint: nft_mint.toBase58()
             }
         } catch (error) {
             throw new Error(`Failed to create NFT: ${error}`);

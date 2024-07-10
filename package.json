@@ -1,6 +1,6 @@
 {
   "name": "@maweiche/react-sdk",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "license": "GPL-3.0",
   "description": "React SDK for SolAI",
   "repository": {
@@ -67,7 +67,7 @@
     "test:admin": "ts-mocha -p tsconfig.json tests/admin.spec.ts",
     "test:collection": "ts-mocha -p tsconfig.json tests/collection.spec.ts",
     "test:userFlow": "ts-mocha -p tsconfig.json tests/userFlow.spec.ts",
-    "test:userFlowAirdrop": "ts-mocha -p tsconfig.json tests/userFlowAirdrop.spec.ts",
+    "test:claimAirdrop": "ts-mocha -p tsconfig.json tests/claimAirdrop.spec.ts",
     "test:sendAirdrop": "ts-mocha -p tsconfig.json tests/sendAirdrop.spec.ts"
   },
   "keywords": [

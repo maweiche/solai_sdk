@@ -523,12 +523,329 @@ export async function POST(request: Request) {
     instructions: instructions
     token_id: id
   }), { status: 200 });
-  }
+}
 ```
+
+### Claim Airdrop as User
+
+When a user already has a Placeholder NFT, their mint process is different because we just need to `finalize` the mint process with the AI image generation. For this use case we will assume the user knows which collection they have received an Airdrop for and have selected it.
+
+#### API ENDPOINT
+```tsx
+import { SDK } from "../src";
+import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import {
+  PublicKey,
+  Keypair,
+  Connection,
+  GetProgramAccountsFilter,
+} from "@solana/web3.js";
+import { TOKEN_2022_PROGRAM_ID, getTokenMetadata } from "@solana/spl-token";
+
+export async function POST(request: Request) {
+  const body = await request.json();
+  const collection = body.collection;
+  const buyer = new PublicKey(body.publicKey);
+
+  sdk = new SDK(
+      userWallet as NodeWallet,
+      new Connection("https://api.devnet.solana.com", "confirmed"),
+      { skipPreflight: true},
+      "devnet",
+  );
+
+  const program = sdk.program;
+
+  const filters:GetProgramAccountsFilter[] = [
+    {
+      dataSize: 170,    //size of account (bytes)
+    },
+    {
+      memcmp: {
+        offset: 32,     //location of our query in the account (bytes)
+        bytes: buyer.toBase58(),  //our search criteria, a base58 encoded string
+      },         
+    }
+  ];
+  const accounts = await sdk.rpcConnection.getParsedProgramAccounts(
+      TOKEN_2022_PROGRAM_ID, 
+      {filters: filters}
+  );
+
+  const completedTxns = [];
+
+  // THIS WILL MINT A NFT FOR EVERY PLACEHOLDER
+  for( let i = 0; i < accounts.length; i++ ) {
+    //Parse the account data
+    const parsedAccountInfo:any = accounts[i].account.data;
+    const mintAddress:string = parsedAccountInfo["parsed"]["info"]["mint"];
+    const tokenBalance: number = parsedAccountInfo["parsed"]["info"]["tokenAmount"]["uiAmount"];
+
+    const _token_metadata = await getTokenMetadata(sdk.rpcConnection, new PublicKey(mintAddress));
+
+    if (_token_metadata!.additionalMetadata.length < 6  || tokenBalance == 0  ) {
+      continue;
+    }
+
+    const collection_key = _token_metadata!.additionalMetadata[5][1]
+
+    if(collection_key === collection) {
+
+      const placeholder_mint = new PublicKey(mintAddress);
+      const placeholder_metadata = await getTokenMetadata(connection, placeholder_mint);
+      
+      const additional_metadata = _token_metadata!.additionalMetadata;
+      const token_id = additional_metadata[1][1];
+
+      const getCollectionUrl = async(collection: PublicKey) => {
+          const collection_data = await connection.getAccountInfo(collection);
+          const collection_decode = program.coder.accounts.decode("Collection", collection_data!.data);
+
+          return {
+            url: collection_decode.url,
+            count: collection_decode.mintCount.toNumber(),
+            owner: collection_decode.owner,
+          }
+      }
+      const { url, owner } = await getCollectionUrl(collection);
+      console.log('URL TO POLL: ',`${url}/${token_id}/${buyer.toBase58()}`)
+      
+      const {tx_signature, nft_mint} = await sdk.nft.createNft(
+        connection,  // connection: Connection,
+        process.env.bearer, // bearer
+        userKeypair, // admin
+        collection_owner, // collection owner
+        buyer, // buyer    
+        placeholder_mint // placeholder mint address
+      ); // returns txn signature and nft mint address
+
+
+      console.log(`nft mint: ${nft_mint}`);
+
+      console.log(`nft tx url: https://explorer.solana.com/tx/${tx_signature}?cluster=${sdk.cluster}`);
+
+      const _tx_obj = {
+        nft_mint: nft_mint
+        signature: tx_signature
+      }
+
+      completedTxns.push(_tx_obj);
+    }
+  }
+
+  return new Response(JSON.stringify({
+    transactions: completedTxns
+  }), { status: 200 });
+}
+```
+
+#### FRONT-END
+
+```tsx
+async function mintNft(){
+  try {
+    const id = Math.floor(Math.random() * 100000); //random number used to create seeds for buyers placeholder/nft
+
+    // INITIATE MINTING TXN -- REQUIRES USER WALLET SIGNATURE
+    const { transactions } : <nft_mint: string, signature: string>[] = await fetch('/api/claim', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        collection: collection.publicKey, 
+        publicKey: buyer.publicKey?.toBase58()
+      })
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log(`View your NFT: https://solscan.io/address/${transactions[0].nft_mint}?cluster=${sdk.cluster}`)
+    console.log(`View the mint txn: https://explorer.solana.com/tx/${transactions[0].signature}?cluster=${sdk.cluster}`)
+  } catch (error) {
+    console.log('error', error)
+  }
+};
+```
+
 
 ### Building a Blink Url API Route
 
-```ts
+To enable Blink Style URLS you need to set up 3 API Routes:
+
+- /api/actions.json
+- /api/blink
+- /api/blink/[key]
+
+```tsx
+/api/actions.json
+
+// This route just tells the Blink readers your routing
+
+import { ACTIONS_CORS_HEADERS, ActionsJson } from "@solana/actions";
+
+export const GET = async () => {
+  const payload: ActionsJson = {
+    rules: [
+      {
+        pathPattern: "/blink",
+        apiPath: "/api/blink",
+      },
+    ],
+  };
+
+  return Response.json(payload, {
+    headers: ACTIONS_CORS_HEADERS,
+  });
+};
+
+export const OPTIONS = GET;
+
+```
+
+```tsx
+/api/blink
+
+// Main two routes here are GET and OPTIONS
+
+const MINT_AMOUNT_OPTIONS = [1];
+const DEFAULT_MINT_AMOUNT_SOL = 1;
+
+
+export async function GET( request: Request ) {
+    try {
+        console.log('route pinged')
+        function getDonateInfo() {
+            const icon = 'https://devnet.irys.xyz/9gdv51JL7p1dtf8Y79og8pJ5s_4tkKYvjMpzcE_moYU'; // IMAGE DISPLAYED IN BLINK
+            const title = 'SolAI Test Blink';
+            const description = 'Get a NFT from the SolAI Test Collection. All proceeds go to the SolAI Test Collection.';
+            return { icon, title, description };
+        }
+        
+        const { icon, title, description } = getDonateInfo();
+
+
+        const response = {
+            icon,
+            label: `${DEFAULT_MINT_AMOUNT_SOL} SOL`,
+            title,
+            description,
+            links: {
+            actions: [
+                ...MINT_AMOUNT_OPTIONS.map((amount) => ({
+                label: `${amount} SOL`,
+                href: `/api/blink/1`,
+                })),
+            ],
+            },
+        };
+
+        console.log('response', response);
+        const res = new Response(
+            JSON.stringify(response), {
+                status: 200,
+                headers: {
+                    'access-control-allow-origin': '*',
+                    'content-type': 'application/json; charset=UTF-8'
+                }
+            }
+        );
+        console.log('res', res);
+        return res
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
+}
+
+export async function OPTIONS( request: Request ) {
+    return new Response(null, {
+        headers: {
+            'access-control-allow-origin': '*',
+            'content-type': 'application/json; charset=UTF-8'
+        }
+    });
+};
+```
+
+```tsx
+/api/blink/[key]
+
+// This is the Post route that will generate the txn instructions that will begin the minting process
+
+import { prepareTransaction } from '../../../../helpers/transaction-utils';
+import {
+    PublicKey,
+    Keypair,
+    Connection,
+} from "@solana/web3.js";
+import * as b58 from "bs58";
+import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import { SDK } from '@maweiche/react-sdk';
+
+export async function POST( request: Request ) {
+  try{
+      const sdk = new SDK(
+      userWallet as NodeWallet,
+      new Connection("https://api.devnet.solana.com", "confirmed"),
+      { skipPreflight: true},
+      "devnet",
+  );
+
+  //  PROGRAM AND ADDRESSES
+  const program = sdk.program;
+  
+  const collection_owner = admin2Wallet.publicKey;
+  
+  const id = Math.floor(Math.random() * 100000);
+  const { account } = await request.json();
+  const buyer = new PublicKey(account);
+  console.log('buyer', buyer.toBase58());
+
+
+  const placeholder_tx = await sdk.placeholder.createPlaceholder(
+      sdk.rpcConnection,
+      userKeypair.publicKey,
+      collection_owner,
+      buyer,
+      id,
+  );
+
+  console.log('placeholder_tx', placeholder_tx);
+
+  const _tx = await sdk.nft.createNft(
+      sdk.rpcConnection,  // connection: Connection,
+      process.env.BEARER!, // bearer
+      userKeypair.publicKey, // admin
+      collection_owner, // collection owner
+      buyer, // buyer   
+      id 
+  ); 
+
+      
+  const instructions = [
+      ...placeholder_tx.instructions, 
+      ..._tx.instructions
+  ];
+  const transaction = await prepareTransaction(instructions, buyer);
+  transaction.sign([admin2Keypair])
+
+  const base64 = Buffer.from(transaction.serialize()).toString('base64');
+  const response = {
+      transaction: base64,
+  };
+
+  return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: {
+          'access-control-allow-origin': '*',
+          'content-type': 'application/json; charset=UTF-8'
+      }
+  });
+  
+  } catch (e) {
+      console.log(e);
+      throw e;
+  }
+};
 
 ```
 
