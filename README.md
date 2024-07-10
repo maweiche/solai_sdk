@@ -152,17 +152,13 @@ export async function POST(request: Request) {
   const body = await request.json();
 
   const owner = new PublicKey(body.owner);  // Collection Owner
-  const name = body.name;
-  const symbol = body.symbol;
-  const sale_start_time = new anchor.BN(body.sale_start_time);
-  const max_supply = new anchor.BN(body.max_supply);
-  const price = new anchor.BN(body.price);
-  const stable_id = body.stable_id;
-  const reference = body.reference;
+  const name = body.name; /// Test Collection
+  const symbol = body.symbol; // TST
+  const sale_start_time = new anchor.BN(body.sale_start_time); // new Date()
+  const max_supply = new anchor.BN(body.max_supply); //100
+  const price = new anchor.BN(body.price);   // 1.5
 
-  const whitelist = body.whitelist ? body.whitelist : undefined;
-  const whitelist_price = body.whitelist_price ? new anchor.BN(body.whitelist_price) : undefined;
-  const whitelist_start_time = body.whitelist_start_time ? new anchor.BN(body.whitelist_start_time) : undefined;
+  const stable_id = body.stable_id;
 
   const keypair = Keypair.fromSecretKey(base58.decode(YOUR_BS58_SECRET_KEY));
   const wallet = new NodeWallet(keypair);
@@ -174,22 +170,20 @@ export async function POST(request: Request) {
     "devnet",
   )
 
-  const base64txn = await sdk.collection.createCollection(
-    connection,
-    collectionRefKey,
-    owner,
-    name,
-    symbol,
-    sale_start_time,
-    max_supply,
-    price,
-    stable_id,
-    whitelist,
-    whitelist_price,
-    whitelist_start_time
+  const { instructions } = await sdk.collection.createCollection(
+    admin.publicKey,
+    collectionOwner, // publickey
+    name, //string
+    symbol, // string
+    url, // string
+    sale_start_time, // Big Number
+    sale_end_time, // Big Number
+    max_supply, // Big Number
+    price, // Big Number
+    stable_id, //string
   );
 
-  const tx = Transaction.from(Buffer.from(base64txn, "base64"));
+  const tx = Transaction.from(Buffer.from(instructions, "base64"));
   const serializedTransaction = tx.serialize({
       requireAllSignatures: false,
     });
@@ -201,6 +195,52 @@ export async function POST(request: Request) {
 
 ```
 
+### Collections - FRONT END
+```tsx
+import { useWallet } from '@solana/wallet-adapter-react';
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+
+const { publicKey, sendTransaction } = useWallet();
+
+const confirm = async (signature: string): Promise<string> => {
+  const block = await connection.getLatestBlockhash();
+  await connection.confirmTransaction({
+      signature,
+      ...block
+  })
+  return signature
+}
+
+async function createCollection(){
+  try {
+    const _collection = await fetch('/api/collections/create', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        owner: publicKey?.toBase58(),
+        name: name,
+        symbol: symbol,
+        sale_start_time: sale_start_time,
+        max_supply: max_supply,
+        price: price,
+        stable_id: stable_id,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const _txJson = await _collection.json();
+    const tx = Transaction.from(Buffer.from(_txJson, "base64"));
+    const signature = await sendTransaction(tx, connection, {skipPreflight: true});
+    console.log('signature', signature);
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+```
+
+
 ## Minting NFTs
 
 After a user selects an available Collection they are able to Mint a NFT from that Collection. Because the AI Image Generation will not return instanaeously, we have built the following flow for the minting process:
@@ -211,8 +251,8 @@ After a user selects an available Collection they are able to Mint a NFT from th
 - Upon completion of the AI Image Generation a new NFT (Token 2022) is created and sent directly to the User while simultaneously Burning their Placeholder NFT.
 
 For this API route example we broke this process down into two routes:
-- `mint` - returns a base64 encoded transaction
-- `finalize` - returns a base64 encoded transaction
+- `mint` - returns { instructions: TransactionInstruction[], placeholder_mint: PublicKey}
+- `finalize` - returns { tx_signature: string, nft_mint: string }
 
 The `mint` route returns a transaction to be signed by the user while the `finalize` returns a transaction signature since the admin wallet is paying for the nft transfer/creation after the AI Image Generation is complete.
 
@@ -221,9 +261,8 @@ The `mint` route returns a transaction to be signed by the user while the `final
 
 ### Standard Flow
 
-#### Mint
+#### Mint -- API ROUTE
 ```tsx
-import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { Keypair, Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { SDK } from '@maweiche/react-sdk';
 import base58, * as bs58 from "bs58";
@@ -234,32 +273,137 @@ export async function POST(request: Request) {
   const id = body.id;
   const collectionOwner = new PublicKey(body.collectionOwner);
   const publicKey = new PublicKey(body.publicKey);
-
   const keypair = Keypair.fromSecretKey(base58.decode(YOUR_BS58_SECRET_KEY));
   const wallet = new NodeWallet(keypair);
+  const connection = new Connection("https://api.devnet.solana.com", "finalized");
+
   const sdk = new SDK(
     wallet,
-    connection,
-    { skipPreflight: true},
-    "devnet",
+    connection, // rpc connection
+    { skipPreflight: true }, // confirmation options
+    "devnet", // rpc cluster -- mainnet / devnet / localnet
   )
 
-  const instructions = await sdk.placeholder.createPlaceholder(
-    admin.publickey, // publickey
+  const { instructions, placeholder_mint } = await sdk.placeholder.createPlaceholder(
+    wallet.feePayer, // admin keypair
     collectionOwner, // collection owner publickey
-    publicKey,
-    id,
-    'https://gateway.irys.xyz/-mpn67FnEePrsoKez4f6Dvjb1aMcH1CqCdZX0NCyHK8'
+    buyer.publicKey, // buyer's publickey
+    id, // id used for seeds
+    'https://arweave.net/-mpn67FnEePrsoKez4f6Dvjb1aMcH1CqCdZX0NCyHK8' // placeholder uri
   );
 
 
-  return new Response(JSON.stringify({
-    instructions: instructions
-  }), { status: 200 });
-  }
+  const tx = new Transaction().add(...instructions);
+  tx.partialSign(wallet.feePayer);
+
+  const serializedTransaction = tx.serialize({
+    requireAllSignatures: false,
+  });
+
+  const base64 = serializedTransaction.toString("base64");
+  
+  return new Response(
+    JSON.stringify({
+      transaction: base64,
+      placeholder_mint: placeholder_mint
+    }), 
+    { status: 200 }
+  );
+}
 ```
 
-#### Finalize
+#### MINT - FRONT END
+```tsx
+import { useWallet } from '@solana/wallet-adapter-react';
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+
+const { publicKey, sendTransaction } = useWallet();
+
+const confirm = async (signature: string): Promise<string> => {
+  const block = await connection.getLatestBlockhash();
+  await connection.confirmTransaction({
+      signature,
+      ...block
+  })
+  return signature
+}
+
+async function mintNft(){
+  try {
+    const id = Math.floor(Math.random() * 100000); //random number used to create seeds for buyers placeholder/nft
+
+    // INITIATE MINTING TXN -- REQUIRES USER WALLET SIGNATURE
+    const _tx = await fetch('/api/mint', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        id: id, 
+        collectionOwner: collectionOwner.publicKey, 
+        publicKey: buyer.publicKey?.toBase58()})
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const { transaction, placeholder_mint } = await _tx.json();
+
+    const tx = Transaction.from(Buffer.from(transaction, "base64"));
+    const signature = await sendTransaction(tx, connection, {skipPreflight: true});
+
+    // ONCE THIS CONFIRMS, WE KNOW THE USER HAS PAID AND THE PLACEHOLDER SUCCESFULLY MINTED
+    const confirmation = await confirm(sig);
+
+    // GET THE IMAGE URL TO POLL
+    const placeholder_metadata = await getTokenMetadata(connection, placeholder_mint);
+    console.log('placeholder_metadata', placeholder_metadata)
+    
+    const additional_metadata = placeholder_metadata!.additionalMetadata;
+    const token_id = additional_metadata[1][1];
+    console.log('placeholder mint', placeholder_mint.toBase58());
+    console.log('placeholder token id', token_id);
+
+    const getCollectionUrl = async(collection: PublicKey) => {
+        const collection_data = await connection.getAccountInfo(collection);
+        const collection_decode = program.coder.accounts.decode("Collection", collection_data!.data);
+        // console.log('collection_decode', collection_decode)
+        return {
+            url: collection_decode.url,
+            count: collection_decode.mintCount.toNumber(),
+        }
+    }
+    const { url } = await getCollectionUrl(collection);
+    console.log('URL TO POLL: ',`${url}/${token_id}/${buyer.toBase58()}`)
+
+
+    
+    // BEGIN MINTING THE NFT -- SEE NEXT SNIPPET FOR API ROUTE
+    if(confirmation) {
+      const _response = await fetch('/api/finalize', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          id: id, 
+          collectionOwner: collectionOwner.toBase58(), 
+          publicKey: publicKey?.toBase58(),
+          placeholderMint: placeholder_mint
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const { tx_signature, nft_mint } = await _response.json();
+
+      console.log(`View NFT: https://solscan.io/token/${response.nft_mint}?cluster=${sdk.cluster}`)
+      console.log(`View txn: https://explorer.solana.com/tx/${tx_signature}?cluster=${sdk.cluster}`)
+    }
+  } catch (error) {
+    console.log('error', error)
+  }
+};
+
+```
+
+
+#### Finalize -- API ENDPOINT
 
 ```tsx
 // ex. response
@@ -281,6 +425,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const id = body.id;
     const publicKey = new PublicKey(body.publicKey);
+    const placeholderMint = new PublicKey(body.placeholderMint)
     const collectionOwner = new PublicKey(body.collectionOwner);
 
     const bearerToken = process.env.BEARER as string;
@@ -295,24 +440,23 @@ export async function POST(request: Request) {
       "devnet",
     )
 
-    const createNft = await sdk.nft.createNft(
-      connection, // connection
-      "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c", // url for ai image
-      bearerToken, // bearer
-      admin2Keypair, // admin
-      collectionOwner, // collection owner
-      publicKey, // buyer
-    );
+    const {tx_signature, nft_mint} = await sdk.nft.createNft(
+      sdk.rpcConnection,  // rpc connection
+      process.env.BEARER, // bearer token for ai image auth
+      wallet.feePayer, // admin keypair
+      collectionOwner, // collection owner publickey
+      publicKey, // buyer publickey   
+      placeholderMint // placeholder mint address as publickey
+    ); // returns txn signature and nft mint address
 
-    await sdk.placeholder.burnPlaceholder(
-      connection, // connection
-      id, // id
-      admin2Keypair,  // admin
-      publicKey, // buyer
-      collectionOwner  // collection owner
-    );
 
-    return new Response(JSON.stringify(createNft), { status: 200 });
+    return new Response(
+      JSON.stringify({
+        tx_signature: tx_signature,
+        nft_mint: nft_mint
+      }), 
+      { status: 200 }
+    );
   } catch (error) {
     console.log('error', error)
     return new Response('error', { status: 500 });
@@ -377,6 +521,7 @@ export async function POST(request: Request) {
 
   return new Response(JSON.stringify({
     instructions: instructions
+    token_id: id
   }), { status: 200 });
   }
 ```
@@ -399,3 +544,12 @@ We welcome contributions to improve the SDK. Please raise an issue or submit a p
 ## License
 
 The SolAI SDK is licensed under the [GNU General Public License v3.0](https://github.com/maweiche).
+
+
+
+
+
+
+<!-- /// airdrop fn -->
+<!-- /// airdrop script -->
+<!-- // how to identify  a placeholder's id when claiming airdrop? -->

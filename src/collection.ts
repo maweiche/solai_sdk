@@ -1,6 +1,6 @@
 import { SDK } from ".";
 import * as anchor from "@coral-xyz/anchor";
-import { PublicKey, TransactionInstruction, Connection, SystemProgram, DataSizeFilter, GetProgramAccountsConfig, MemcmpFilter } from "@solana/web3.js";
+import { PublicKey, TransactionInstruction, Connection, SystemProgram, Keypair, GetProgramAccountsConfig, MemcmpFilter } from "@solana/web3.js";
 
 export type CollectionData = {
     name: string,
@@ -90,18 +90,17 @@ export class Collection {
         }
     }
     public async createCollection(
-        admin: PublicKey,
+        admin: Keypair,
         owner: PublicKey,
         name: string,
         symbol: string,
         url: string,
         sale_start_time: anchor.BN,
+        sale_end_time: anchor.BN,
         max_supply: anchor.BN,
         price: anchor.BN,
         stable_id: string,
     ): Promise<{ 
-        // tx_signature: string, 
-        // nft_mint: string 
         instructions: TransactionInstruction[]
       }>{
         try{
@@ -109,7 +108,7 @@ export class Collection {
             const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), owner.toBuffer()], program.programId)[0];
 
-            const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.toBuffer()], program.programId)[0];
+            const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.publicKey.toBuffer()], program.programId)[0];
             const collectionRefKey = new PublicKey("mwUt7aCktvBeSm8bry6TvqEcNSUGtxByKCbBKfkxAzA");
             const createCollectionIx = await program.methods
                 .createCollection(
@@ -118,12 +117,13 @@ export class Collection {
                     symbol,
                     url,
                     sale_start_time,
+                    sale_end_time,
                     max_supply,
                     price,
                     stable_id,
                 )
                 .accounts({
-                    admin: admin,
+                    admin: admin.publicKey,
                     owner,
                     collection,
                     adminState: adminState,

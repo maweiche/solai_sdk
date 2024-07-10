@@ -23,10 +23,10 @@ console.log('userKeypair', userKeypair.publicKey.toBase58());
 const userWallet = new NodeWallet(userKeypair);
 
 
-describe("Typical flow of collection owner airdropping a Placeholder and User trading it for an NFT", async () => {
+describe("Typical user flow of buying an NFT", async () => {
     let sdk: SDK;
     const wallet = userWallet;
-    const connection = new Connection("http://localhost:8899 ", "finalized");
+    const connection = new Connection("https://api.devnet.solana.com", "finalized");
     console.log('wallet', wallet.publicKey.toBase58());
 
     // Helpers
@@ -51,7 +51,7 @@ describe("Typical flow of collection owner airdropping a Placeholder and User tr
 
 
 
-    it("should create a placeholder, create/transfer nft, burn placeholder", async () => {
+    it("should find a placeholder, create/transfer nft, burn placeholder", async () => {
         sdk = new SDK(
             userWallet as NodeWallet,
             new Connection("https://api.devnet.solana.com", "confirmed"),
@@ -69,41 +69,65 @@ describe("Typical flow of collection owner airdropping a Placeholder and User tr
         const admin3Wallet = new NodeWallet(admin3KeyPair);
         console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 
+
+        const buyer = userWallet.publicKey;
         const collection_owner = admin3Wallet.publicKey;
         const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collection_owner.toBuffer()], program.programId)[0];
         console.log('placeholder collection owner', collection_owner.toBase58());
-
-        const placeholder_tx = await sdk.placeholder.airdropPlaceholder(
-            userKeypair.publicKey,
-            collection_owner,
-            admin2Wallet.publicKey,
-            id,
-        );
-
-        const transaction = new Transaction();
+        console.log('placeholder collection', collection.toBase58());
         
+        
+        // const placeholder_tx = await sdk.placeholder.createPlaceholder(
+        //     userWallet.publicKey,
+        //     collection_owner,
+        //     buyer,
+        //     id,
+        // );
+
+        //Find the placeholder
+        
+
+
+
+        // GET THE DYNAMIC IMAGE GENERATION URL
+        const getCollectionUrl = async(collection: PublicKey) => {
+            const collection_data = await connection.getAccountInfo(collection);
+            console.log('collection_data', collection_data)
+            const collection_decode = program.coder.accounts.decode("Collection", collection_data!.data);
+            console.log('collection_decode', collection_decode)
+            return {
+              url: collection_decode.url,
+              count: collection_decode.mintCount.toNumber(),
+            }
+          };
+
+        const { url, count } = await getCollectionUrl(collection);
+        const count_plus_one = count + 1;
+        console.log('img url string: ', `${url}/${count_plus_one}/${buyer.toBase58()}`)
+
         const _tx = await sdk.nft.createNft(
             connection,  // connection: Connection,
             "ad4a356ddba9eff73cd627f69a481b8493ed975d7aac909eec4aaebdd9b506ef", // bearer
-            userKeypair.publicKey, // admin
+            userKeypair, // admin
             collection_owner, // collection owner
-            admin2Wallet.publicKey, // buyer    
+            buyer, // buyer    
             id, // id
-        ); // returns base64 string
+        ); // returns txn instructions
 
-        transaction.add(
-            ...placeholder_tx.instructions,
-            ..._tx.instructions
-        )
+        const txn = new Transaction();
+        txn.add(
+            ..._tx.instructions,
+        );
 
-        const sig = await sendAndConfirmTransaction(
+        const _sig = await sendAndConfirmTransaction(
             connection,
-            transaction,
-            [userKeypair, admin3Wallet.payer, admin2Keypair],
+            txn,
+            [userKeypair],
             { commitment: 'confirmed' }
         );
 
-        console.log('sig placeholder', sig);
+        console.log(`nft tx url: https://explorer.solana.com/tx/${_sig}?cluster=devnet`);
+
     });
 
 

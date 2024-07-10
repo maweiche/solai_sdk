@@ -87,6 +87,37 @@ export type SolFactory = {
       ]
     },
     {
+      "name": "removeAdminAccount",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "adminState",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "primaryAdmin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createCollection",
       "accounts": [
         {
@@ -142,12 +173,16 @@ export type SolFactory = {
           "type": "i64"
         },
         {
+          "name": "saleEndTime",
+          "type": "i64"
+        },
+        {
           "name": "maxSupply",
           "type": "u64"
         },
         {
           "name": "price",
-          "type": "u64"
+          "type": "f32"
         },
         {
           "name": "stableId",
@@ -627,6 +662,10 @@ export type SolFactory = {
             "type": "i64"
           },
           {
+            "name": "saleEndTime",
+            "type": "i64"
+          },
+          {
             "name": "maxSupply",
             "type": "u64"
           },
@@ -635,8 +674,12 @@ export type SolFactory = {
             "type": "u64"
           },
           {
-            "name": "price",
+            "name": "mintCount",
             "type": "u64"
+          },
+          {
+            "name": "price",
+            "type": "f32"
           },
           {
             "name": "stableId",
@@ -668,7 +711,7 @@ export type SolFactory = {
           },
           {
             "name": "price",
-            "type": "u64"
+            "type": "f32"
           },
           {
             "name": "timeStamp",
@@ -696,7 +739,7 @@ export type SolFactory = {
           },
           {
             "name": "price",
-            "type": "u64"
+            "type": "f32"
           },
           {
             "name": "timeStamp",
@@ -707,20 +750,6 @@ export type SolFactory = {
     }
   ],
   "types": [
-    {
-      "name": "WhiteList",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "wallets",
-            "type": {
-              "vec": "publicKey"
-            }
-          }
-        ]
-      }
-    },
     {
       "name": "Attributes",
       "type": {
@@ -746,6 +775,9 @@ export type SolFactory = {
             "name": "NotTimeYet"
           },
           {
+            "name": "Expired"
+          },
+          {
             "name": "SoldOut"
           },
           {
@@ -753,6 +785,9 @@ export type SolFactory = {
           },
           {
             "name": "WalletDoesNotMatch"
+          },
+          {
+            "name": "TokenAccountMismatch"
           }
         ]
       }
@@ -770,6 +805,33 @@ export type SolFactory = {
           },
           {
             "name": "InstructionsNotCorrect"
+          },
+          {
+            "name": "InvalidSaleTime"
+          },
+          {
+            "name": "InvalidMaxSupply"
+          },
+          {
+            "name": "InvalidPrice"
+          },
+          {
+            "name": "InvalidMintCount"
+          },
+          {
+            "name": "InvalidBalancePreMint"
+          },
+          {
+            "name": "InvalidBalancePostMint"
+          },
+          {
+            "name": "TotalSupplyNotIncreased"
+          },
+          {
+            "name": "InvalidBalancePreBurn"
+          },
+          {
+            "name": "InvalidBalancePostBurn"
           }
         ]
       }
@@ -781,5 +843,8 @@ export type SolFactory = {
       "name": "Unauthorized",
       "msg": "You are not authorized to perform this action"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "DHHnPaKKDLadRHLqVHWf2YpuK5Y6guJio99pD5sh2GVD"
+  }
 }

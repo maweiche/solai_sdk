@@ -1,13 +1,8 @@
-// this will combine
-// 1. createNft
-// 2. transferNft
-
-// into one txn instruction and return it
 import { SDK } from ".";
 import * as anchor from "@coral-xyz/anchor";
 import sol_factory_idl from "src/idl/sol_factory.json";
 import { PublicKey, Transaction, Connection, ComputeBudgetProgram, SystemProgram, sendAndConfirmTransaction, Keypair, TransactionInstruction } from "@solana/web3.js";
-import { TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, getTokenMetadata } from "@solana/spl-token";
 
 export class Nft {
     private readonly sdk: SDK;
@@ -29,39 +24,69 @@ export class Nft {
     public async createNft(
         connection: Connection,
         bearer: string,
-        admin: PublicKey,
+        admin: Keypair,
         collectionOwner: PublicKey,
         buyer: PublicKey,
-        id: number,
+        placeholderMint: PublicKey,
     ): Promise<{ 
-        // tx_signature: string, 
-        // nft_mint: string 
-        instructions: TransactionInstruction[]
+        tx_signature: string, 
+        nft_mint: string 
       }>{
         try{
             const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 600_000 });
             const program = this.sdk.program;
             const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
-            const getCollectionUrl = async (collection: PublicKey) => {
+            const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.publicKey.toBuffer()], program.programId)[0];
+
+
+            const placeholder_metadata = await getTokenMetadata(connection, placeholderMint);            
+            const additional_metadata = placeholder_metadata.additionalMetadata;
+            const id = additional_metadata[0][1];
+            const count = additional_metadata[1][1];
+
+            // GET THE DYNAMIC IMAGE GENERATION URL
+            const getCollectionUrl = async(collection: PublicKey) => {
               const collection_data = await connection.getAccountInfo(collection);
-              const collection_decode = program.coder.accounts.decode("Collection", collection_data!.data);
-              return collection_decode.url;
+              const collection_decode = program.coder.accounts.decode("Collection", collection_data.data);
+              return {
+                url: collection_decode.url,
+              }
             };
 
-            const url = await getCollectionUrl(collection);
-            console.log('url', url)
-            const nft_data = await fetch(url, {
-                method: 'POST',
-                headers: {
-                  "x-authorization" : `Bearer ${bearer}`
-                },
-              });
-              const metadata_json = await nft_data.json(); 
-              const areweave_metadata: any = await fetch(metadata_json.metadataUrl)
-              const areweave_json = await areweave_metadata.json()
+            const { url } = await getCollectionUrl(collection);
+            
+            // BEGIN THE NFT CREATION
+            const url_as_string = `${url}/${count}/${buyer.toBase58()}`
+            const nft_data = await fetch(url_as_string, {
+              method: 'POST',
+              headers: {
+                "x-authorization" : `Bearer ${bearer}`
+              },
+            });
 
-              const nft_name = areweave_json.name;
+
+            const metadata_json = await nft_data.json(); 
+
+              let retries = 0;
+              let arweave_metadata;
+              while (retries < 3) {
+                try {
+                  arweave_metadata = await fetch(metadata_json.metadataUrl)
+                  break;
+                } catch (error) {
+                  console.log('error fetching metadata', error)
+                  retries++;
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+              }
+              if (retries === 3) {
+                throw new Error('Failed to fetch metadata from arweave')
+              }
+
+              const arweave_json = await arweave_metadata.json()
+
+              const nft_name = arweave_json.name;
               const attributes = metadata_json.attributes.map((attr: any) => {
                 return {key: attr.trait_type, value: attr.value}
             });
@@ -72,7 +97,6 @@ export class Nft {
               const nft_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), nft.toBuffer()], program.programId)[0];
               
               const auth = PublicKey.findProgramAddressSync([Buffer.from('auth')], program.programId)[0];
-              const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.toBuffer()], program.programId)[0];
               const buyerNftAta = getAssociatedTokenAddressSync(nft_mint, buyer, false, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)
 
               const placeholder = PublicKey.findProgramAddressSync([Buffer.from('placeholder'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
@@ -87,7 +111,7 @@ export class Nft {
                   attributes,
                 )
                 .accounts({
-                  admin: admin,
+                  admin: admin.publicKey,
                   adminState,   
                   collection: collection,
                   nft,
@@ -103,7 +127,7 @@ export class Nft {
               const transferNftIx = await program.methods
                 .transferNft()
                 .accounts({
-                  payer: admin,
+                  payer: admin.publicKey,
                   buyer: buyer,
                   buyerMintAta: buyerNftAta,
                   nft,
@@ -113,7 +137,7 @@ export class Nft {
                   buyerPlaceholderMintAta: buyerPlaceholderAta,
                   placeholder,
                   placeholderMint: placeholder_mint,
-                  placeholderMintAuthority: admin,
+                  placeholderMintAuthority: admin.publicKey,
                   associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
                   tokenProgram: TOKEN_PROGRAM_ID,
                   token2022Program: TOKEN_2022_PROGRAM_ID,
@@ -123,10 +147,22 @@ export class Nft {
                 .instruction();
                 
                 const instructions: TransactionInstruction[] = [modifyComputeUnitIx, createNftIx, transferNftIx];
+
+                const txn = new Transaction();
+                txn.add(
+                  ...instructions
+                );
+
+                const _sig = await sendAndConfirmTransaction(
+                    connection,
+                    txn,
+                    [admin],
+                    { commitment: 'confirmed' }
+                );
+
             return {
-                // tx_signature: tx_signature,
-                // nft_mint: nft_mint.toString(),
-                instructions: instructions
+                tx_signature: _sig,
+                nft_mint: nft_mint.toBase58()
             }
         } catch (error) {
             throw new Error(`Failed to create NFT: ${error}`);

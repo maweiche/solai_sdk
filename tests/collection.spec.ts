@@ -78,18 +78,19 @@ describe("Create a new collection and get all collections", async () => {
     const price = new anchor.BN(1);
     const whitelist_price = new anchor.BN(0);
     const stable_id = "TS2233321T";
-    const date_i64 = new anchor.BN(Date.now());
-    const yesterday_date_i64 = new anchor.BN(Date.now() * 1000 - 86400000);
+    const start_date_i64 = new anchor.BN(Date.now());
+    const end_date_i64 = new anchor.BN(Date.now() + 86400000); // 24 hours
 
     console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
     const url = "https://amin.stable-dilution.art/nft/item/generation/3/11/0xf75e77b4EfD56476708792066753AC428eB0c21c";
     const _tx = await sdk.collection.createCollection(
-      admin2Wallet.publicKey, 
+      admin2Keypair, 
       admin2Wallet.publicKey, 
       name, 
       symbol, 
       url,
-      date_i64,
+      start_date_i64,
+      end_date_i64,
       max_supply, 
       price, 
       stable_id,
