@@ -128,7 +128,7 @@
         {
           "name": "owner",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "collection",
@@ -534,7 +534,7 @@
         {
           "name": "collectionOwner",
           "isMut": true,
-          "isSigner": true,
+          "isSigner": false,
           "docs": [
             "CHECK"
           ]
@@ -843,8 +843,5 @@
       "name": "Unauthorized",
       "msg": "You are not authorized to perform this action"
     }
-  ],
-  "metadata": {
-    "address": "HQy5LL9S5P1J5H6vThLybsyNNexm4McoctPVUhMbtkDC"
-  }
+  ]
 }
