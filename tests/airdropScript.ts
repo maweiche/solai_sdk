@@ -9,7 +9,7 @@ import {
     TransactionInstruction,
 } from "@solana/web3.js";
 
-const _keypair = require('../test-wallet/keypair2.json');
+const _keypair = require('../test-wallet/keypair.json');
 const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
 console.log('userKeypair', userKeypair.publicKey.toBase58());
 console.log('admin*********', userKeypair.publicKey.toBase58());
@@ -25,10 +25,11 @@ const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
 const admin3Wallet = new NodeWallet(admin3KeyPair);
 console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 
-const collection_owner = userWallet.publicKey;
+const collection_owner = new PublicKey("H21y6LmZkGmBU9k6YzCRB1MpSnMoXHVtiuCxtTqS87w9")
 
 const whiteList = [
-    // INSERT WHITELISTED ADDRESSES HERE
+    "6Y8AFH7EwyfLkWov2ziYD6Yut7dDgbfNCavmU5rePqHX",
+    "H21y6LmZkGmBU9k6YzCRB1MpSnMoXHVtiuCxtTqS87w9"
 ];
 
 let sdk: SDK;
