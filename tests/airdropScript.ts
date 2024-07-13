@@ -25,16 +25,42 @@ const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
 const admin3Wallet = new NodeWallet(admin3KeyPair);
 console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 
-const collection_owner = new PublicKey("H21y6LmZkGmBU9k6YzCRB1MpSnMoXHVtiuCxtTqS87w9")
+const collection_owner = new PublicKey("HZxkqBTnXtAYoFTg2puo9KyiNN42E8Sd2Kh1jq3vT29u")
 
 const whiteList = [
-    "6Y8AFH7EwyfLkWov2ziYD6Yut7dDgbfNCavmU5rePqHX",
-    "H21y6LmZkGmBU9k6YzCRB1MpSnMoXHVtiuCxtTqS87w9"
+    // "6Y8AFH7EwyfLkWov2ziYD6Yut7dDgbfNCavmU5rePqHX",
+    // "H21y6LmZkGmBU9k6YzCRB1MpSnMoXHVtiuCxtTqS87w9",
+    // "6Y8AFH7EwyfLkWov2ziYD6Yut7dDgbfNCavmU5rePqHX",
+    // "H21y6LmZkGmBU9k6YzCRB1MpSnMoXHVtiuCxtTqS87w9",
+    // "6Y8AFH7EwyfLkWov2ziYD6Yut7dDgbfNCavmU5rePqHX",
+    // "H21y6LmZkGmBU9k6YzCRB1MpSnMoXHVtiuCxtTqS87w9",
+    "6KuX26FZqzqpsHDLfkXoBXbQRPEDEbstqNiPBKHNJQ9e",
+    "6KuX26FZqzqpsHDLfkXoBXbQRPEDEbstqNiPBKHNJQ9e",
+    "6KuX26FZqzqpsHDLfkXoBXbQRPEDEbstqNiPBKHNJQ9e",
 ];
 
 let sdk: SDK;
 const wallet = userWallet;
+
+
+// url pool for connection roultting when sending transactions
+const urls = [
+    'https://devnet.helius-rpc.com/?api-key=b7faf1b9-5b70-4085-bf8e-a7be3e3b78c2', // 7wK3jPMYjpZHZAghjersW6hBNMgi9VAGr75AhYRqR2n
+    'https://devnet.helius-rpc.com/?api-key=cde2a7c7-9586-4613-bc68-881d3b03e7a1', // 6KuX26FZqzqpsHDLfkXoBXbQRPEDEbstqNiPBKHNJQ9e
+    'https://soft-cold-energy.solana-devnet.quiknode.pro/ad0dda04b536ff45a76465f9ceee5eea6a048a8f/', // quicknode - maweiche@gmail.com
+];
+
 const connection = new Connection("https://api.devnet.solana.com", "finalized");
+
+
+
+
+
+
+
+
+
+
 console.log('wallet', wallet.publicKey.toBase58());
 
 // Helpers
@@ -96,7 +122,7 @@ async function airdropToWhitelist(){
         );
         console.log(`√ Transaction ${i} sent: ${sig}`);    
 
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
 }

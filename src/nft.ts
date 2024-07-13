@@ -91,9 +91,9 @@ export class Nft {
               const nft_name = arweave_json.name;
               const attributes = metadata_json.attributes.map((attr: any) => {
                 return {key: attr.trait_type, value: attr.value}
-            });
+              });
 
-
+              attributes.push({key: 'token_id', value: count})
               
               const nft = PublicKey.findProgramAddressSync([Buffer.from('ainft'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
               const nft_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), nft.toBuffer()], program.programId)[0];

@@ -161,7 +161,6 @@ export class Placeholder {
 
             const instructions: TransactionInstruction[] = [modifyComputeUnitIx, createPlaceholderIx, ed25519Ix, airdropPlaceholderIx];
 
-            console.log('instructions', instructions);
             return {
               instructions: instructions,
               placeholder_mint: placeholder_mint
