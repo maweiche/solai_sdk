@@ -16,7 +16,7 @@ export class Admin {
     
     /**
      * 
-     * 
+     * Instructions for Initializing the Protocol Lock Account, Toggling the Protocol Lock, Initializing an Admin Account, and Checking if an Account is an Admin.
      * 
      */
     public async checkIfAdmin(

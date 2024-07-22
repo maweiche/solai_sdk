@@ -62,13 +62,6 @@ export class Nft {
             const url_as_string = `${url}/${count}/${buyer.toBase58()}`
             console.log('URL TO POLL: ', bearer)
 
-            // const nft_data = await fetch(url_as_string, {
-            //   method: 'POST',
-            //   headers: {
-            //     "x-authorization" : `Bearer ${bearer}`
-            //   },
-            // }); 
-            // turn this into an axios request
             const nft_data: any = await axios.post(url_as_string, {}, {
               headers: {
                 "x-authorization" : `Bearer ${bearer}`

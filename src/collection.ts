@@ -24,7 +24,7 @@ export class Collection {
     }
     /**
      * 
-     * 
+     * Instructions for creating a collection, getting a collection by owner, and getting all collections.
      * 
      */
 
