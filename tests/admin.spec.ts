@@ -13,32 +13,20 @@ import {
   GetProgramAccountsConfig,
   DataSizeFilter
 } from "@solana/web3.js";
-import dotenv from "dotenv";
+// import dotenv from "dotenv";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { describe, it } from "node:test";
 import * as base58 from 'bs58';
-dotenv.config();
 
-// anchor.setProvider(anchor.AnchorProvider.env());
-const keypair1 = process.env.KEYPAIR1 as any;
-const keypair2 = process.env.KEYPAIR2 as any;
-const keypair3 = process.env.KEYPAIR3 as any;
-
-const admin1Keypair = Keypair.fromSecretKey(base58.decode(keypair1));
-const admin2Keypair = Keypair.fromSecretKey(base58.decode(keypair2));
-const admin3KeyPair = Keypair.fromSecretKey(base58.decode(keypair3))
-
-const admin1Wallet = new NodeWallet(admin1Keypair);
-const admin2Wallet = new NodeWallet(admin2Keypair);
-const admin3Wallet = new NodeWallet(admin3KeyPair);
 describe("Initialize Admin", async () => {
   let sdk: SDK;
 
   console.log('starting')
-  const wallet = admin1Wallet;
+  const _keypair = require('../test-wallet/keypair.json');
+  const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair));
+  const userWallet = new NodeWallet(userKeypair);
+
   const connection = new Connection("https://api.devnet.solana.com", "finalized");
-  // const programId = new PublicKey("EsgdV69W9Qi6i2q6Gfus8vuy27aXwrf61gC1z1hbnr6d");
-  console.log('wallet', wallet.publicKey.toBase58());
 
   // Helpers
   function wait(ms: number) {
@@ -62,32 +50,25 @@ describe("Initialize Admin", async () => {
  
   it("should initialize an admin", async () => {
     sdk = new SDK(
-      admin1Wallet as NodeWallet,
+      userWallet as NodeWallet,
       new Connection("https://api.devnet.solana.com", "confirmed"),
       { skipPreflight: true},
       "devnet",
     );
-
-    // const check_if_admin_fail = await sdk.admin.checkIfAdmin(
-    //   sdk.rpcConnection, // connection: Connection,
-    //   admin2Wallet.publicKey //   admin: PublicKey,
-    // );
-
-    // console.log('check_if_admin_fail', check_if_admin_fail)
     
     const _tx = await sdk.admin.initAdmin(
       sdk.rpcConnection, // connection: Connection,
-      admin2Wallet.publicKey, //   admin: PublicKey,
+      userWallet.publicKey, //   admin: PublicKey,
       "BOO", //   username: string,
-      admin3Wallet.publicKey// admin2Wallet.publicKey //   newAdmin?: PublicKey,
+      userWallet.publicKey// admin2Wallet.publicKey //   newAdmin?: PublicKey,
     );
     const tx = Transaction.from(Buffer.from(_tx, "base64"));
-    await sendAndConfirmTransaction(connection, tx, [admin2Keypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
+    await sendAndConfirmTransaction(connection, tx, [userKeypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
 
 
     const check_if_admin_pass = await sdk.admin.checkIfAdmin(
       sdk.rpcConnection, // connection: Connection,
-      admin2Wallet.publicKey //   admin: PublicKey,
+      userWallet.publicKey //   admin: PublicKey,
     );
 
     console.log('check_if_admin', check_if_admin_pass)
@@ -95,7 +76,7 @@ describe("Initialize Admin", async () => {
 
   it("should lock the protocol", async () => {
     sdk = new SDK(
-      admin1Wallet as NodeWallet,
+      userWallet as NodeWallet,
       new Connection("https://api.devnet.solana.com", "confirmed"),
       { skipPreflight: true},
       "devnet",
@@ -103,9 +84,9 @@ describe("Initialize Admin", async () => {
 
     const _tx = await sdk.admin.lockProtocolAccount(
       sdk.rpcConnection, // connection: Connection,
-      admin2Wallet.publicKey //   admin: PublicKey,
+      userWallet.publicKey //   admin: PublicKey,
     );
     const tx = Transaction.from(Buffer.from(_tx, "base64"));
-    await sendAndConfirmTransaction(connection, tx, [admin2Keypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
+    await sendAndConfirmTransaction(connection, tx, [userKeypair], {commitment: "finalized", skipPreflight: true}).then(confirm).then(log);
   });
 });

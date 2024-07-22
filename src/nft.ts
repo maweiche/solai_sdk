@@ -3,7 +3,7 @@ import * as anchor from "@coral-xyz/anchor";
 import sol_factory_idl from "src/idl/sol_factory.json";
 import { PublicKey, Transaction, Connection, ComputeBudgetProgram, SystemProgram, sendAndConfirmTransaction, Keypair, TransactionInstruction } from "@solana/web3.js";
 import { TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, getTokenMetadata } from "@solana/spl-token";
-
+import axios from "axios";
 export class Nft {
     private readonly sdk: SDK;
 
@@ -37,6 +37,7 @@ export class Nft {
             const program = this.sdk.program;
             const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
+            const collection_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), collection.toBuffer()], program.programId)[0];
             const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.publicKey.toBuffer()], program.programId)[0];
 
 
@@ -60,15 +61,21 @@ export class Nft {
             // BEGIN THE NFT CREATION
             const url_as_string = `${url}/${count}/${buyer.toBase58()}`
             console.log('URL TO POLL: ', bearer)
-            const nft_data = await fetch(url_as_string, {
-              method: 'POST',
+
+            // const nft_data = await fetch(url_as_string, {
+            //   method: 'POST',
+            //   headers: {
+            //     "x-authorization" : `Bearer ${bearer}`
+            //   },
+            // }); 
+            // turn this into an axios request
+            const nft_data: any = await axios.post(url_as_string, {}, {
               headers: {
                 "x-authorization" : `Bearer ${bearer}`
-              },
-            });
-
+              }
+            })
             console.log('nft_data', nft_data)
-            const metadata_json = await nft_data.json(); 
+            const metadata_json = await nft_data.data;
             console.log('metadata_json', metadata_json)
             await new Promise(resolve => setTimeout(resolve, 3000));
             let arweave_metadata;
@@ -94,7 +101,7 @@ export class Nft {
               });
 
               attributes.push({key: 'token_id', value: count})
-              
+              console.log('attributes after all is added', attributes)
               const nft = PublicKey.findProgramAddressSync([Buffer.from('ainft'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
               const nft_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), nft.toBuffer()], program.programId)[0];
               
@@ -116,6 +123,7 @@ export class Nft {
                   admin: admin.publicKey,
                   adminState,   
                   collection: collection,
+                  collectionMint: collection_mint,
                   nft,
                   mint: nft_mint,
                   auth,

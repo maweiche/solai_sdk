@@ -1,5 +1,5 @@
 # SolAi - Solana Program SDK
-A SDK built for use in correlation with the [Sol Factory](https://github.com/maweiche/sol_factory) Solana program.
+A SDK built for use in correlation with Playground's [Vision](https://github.com/playground-solana/sol_factory) Solana program.
 
 Below you can find instructions on using the SDK locally followed by a deeper dive into the SDK's structure and details.
 
@@ -9,17 +9,15 @@ Below you can find instructions on using the SDK locally followed by a deeper di
 ## Program ID
 | Cluster      | Program Id |
 | :---        |    :----:   |
-| **Localnet**     | `4Fj9kuGYLye3pwCBYaXbuzocEy22gPWT5TcJVJ6JauUt` |
-| **Devnet**  | `6rHuJFF9XCxi9eDHtgJPcBKNpMWyBHhQhrFSkUD5XMYo` |
-| **Mainnet**  | ``  |
+| **Localnet**     | `E72hAXTsSJn79Xb9mBB7kmK9VoX3HGNaoCyrqEqCE6dd` |
+| **Devnet**  | `E72hAXTsSJn79Xb9mBB7kmK9VoX3HGNaoCyrqEqCE6dd` |
+| **Mainnet**  | `E72hAXTsSJn79Xb9mBB7kmK9VoX3HGNaoCyrqEqCE6dd`  |
 
 ## Description
 
-The Sol Factory program is structured for Artists to create on-chain `Collections` that a user can mint a Token-2022 `NFT` from on the Solana blockchain.
+The Vision program is structured for Artists to create on-chain `Collections` that a user can mint a Token-2022 `NFT` from on the Solana blockchain.
 
-The Solana Factory program was built for use with the [Sol Ai SDK](https://npmjs.com).
-
-You can view a baremetal combination of the Program and SDK live on Devnet [here]().
+The Vision program was built for use with the [Vision SDK](https://www.npmjs.com/package/@maweiche/react-sdk).
 
 ## Getting Started
 
@@ -665,208 +663,10 @@ async function mintNft(){
   }
 };
 ```
-
-
-### Building a Blink Url API Route
-
-To enable Blink Style URLS you need to set up 3 API Routes:
-
-- /api/actions.json
-- /api/blink
-- /api/blink/[key]
-
-```tsx
-/api/actions.json
-
-// This route just tells the Blink readers your routing
-
-import { ACTIONS_CORS_HEADERS, ActionsJson } from "@solana/actions";
-
-export const GET = async () => {
-  const payload: ActionsJson = {
-    rules: [
-      {
-        pathPattern: "/blink",
-        apiPath: "/api/blink",
-      },
-    ],
-  };
-
-  return Response.json(payload, {
-    headers: ACTIONS_CORS_HEADERS,
-  });
-};
-
-export const OPTIONS = GET;
-
-```
-
-```tsx
-/api/blink
-
-// Main two routes here are GET and OPTIONS
-
-const MINT_AMOUNT_OPTIONS = [1];
-const DEFAULT_MINT_AMOUNT_SOL = 1;
-
-
-export async function GET( request: Request ) {
-    try {
-        console.log('route pinged')
-        function getDonateInfo() {
-            const icon = 'https://devnet.irys.xyz/9gdv51JL7p1dtf8Y79og8pJ5s_4tkKYvjMpzcE_moYU'; // IMAGE DISPLAYED IN BLINK
-            const title = 'SolAI Test Blink';
-            const description = 'Get a NFT from the SolAI Test Collection. All proceeds go to the SolAI Test Collection.';
-            return { icon, title, description };
-        }
-        
-        const { icon, title, description } = getDonateInfo();
-
-
-        const response = {
-            icon,
-            label: `${DEFAULT_MINT_AMOUNT_SOL} SOL`,
-            title,
-            description,
-            links: {
-            actions: [
-                ...MINT_AMOUNT_OPTIONS.map((amount) => ({
-                label: `${amount} SOL`,
-                href: `/api/blink/1`,
-                })),
-            ],
-            },
-        };
-
-        console.log('response', response);
-        const res = new Response(
-            JSON.stringify(response), {
-                status: 200,
-                headers: {
-                    'access-control-allow-origin': '*',
-                    'content-type': 'application/json; charset=UTF-8'
-                }
-            }
-        );
-        console.log('res', res);
-        return res
-    } catch (e) {
-        console.log(e);
-        throw e;
-    }
-}
-
-export async function OPTIONS( request: Request ) {
-    return new Response(null, {
-        headers: {
-            'access-control-allow-origin': '*',
-            'content-type': 'application/json; charset=UTF-8'
-        }
-    });
-};
-```
-
-```tsx
-/api/blink/[key]
-
-// This is the Post route that will generate the txn instructions that will begin the minting process
-
-import { prepareTransaction } from '../../../../helpers/transaction-utils';
-import {
-    PublicKey,
-    Keypair,
-    Connection,
-} from "@solana/web3.js";
-import * as b58 from "bs58";
-import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
-import { SDK } from '@maweiche/react-sdk';
-
-export async function POST( request: Request ) {
-  try{
-      const sdk = new SDK(
-      userWallet as NodeWallet,
-      new Connection("https://api.devnet.solana.com", "confirmed"),
-      { skipPreflight: true},
-      "devnet",
-  );
-
-  //  PROGRAM AND ADDRESSES
-  const program = sdk.program;
-  
-  const collection_owner = admin2Wallet.publicKey;
-  
-  const id = Math.floor(Math.random() * 100000);
-  const { account } = await request.json();
-  const buyer = new PublicKey(account);
-  console.log('buyer', buyer.toBase58());
-
-
-  const placeholder_tx = await sdk.placeholder.createPlaceholder(
-      sdk.rpcConnection,
-      userKeypair.publicKey,
-      collection_owner,
-      buyer,
-      id,
-  );
-
-  console.log('placeholder_tx', placeholder_tx);
-
-  const _tx = await sdk.nft.createNft(
-      sdk.rpcConnection,  // connection: Connection,
-      process.env.BEARER!, // bearer
-      userKeypair.publicKey, // admin
-      collection_owner, // collection owner
-      buyer, // buyer   
-      id 
-  ); 
-
-      
-  const instructions = [
-      ...placeholder_tx.instructions, 
-      ..._tx.instructions
-  ];
-  const transaction = await prepareTransaction(instructions, buyer);
-  transaction.sign([admin2Keypair])
-
-  const base64 = Buffer.from(transaction.serialize()).toString('base64');
-  const response = {
-      transaction: base64,
-  };
-
-  return new Response(JSON.stringify(response), {
-      status: 200,
-      headers: {
-          'access-control-allow-origin': '*',
-          'content-type': 'application/json; charset=UTF-8'
-      }
-  });
-  
-  } catch (e) {
-      console.log(e);
-      throw e;
-  }
-};
-
-```
-
-
-## App
-
-Check out the [example app](https://solai-sdk-test.vercel.app/) 
-
 ## Contributing
 
 We welcome contributions to improve the SDK. Please raise an issue or submit a pull request with any suggestions or bug fixes.
 
 ## License
 
-The SolAI SDK is licensed under the [GNU General Public License v3.0](https://github.com/maweiche).
-
-
-
-
-
-
-<!-- /// airdrop fn -->
-<!-- /// airdrop script -->
-<!-- // how to identify  a placeholder's id when claiming airdrop? -->
+The Vision - SolAI SDK is licensed under the [MIT License](https://github.com/playground-solana/solai_sdk/LICENSE).

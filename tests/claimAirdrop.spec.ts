@@ -9,9 +9,8 @@ import {
 import { TOKEN_2022_PROGRAM_ID, getTokenMetadata } from "@solana/spl-token";
 import { describe, it } from "node:test";
 
-const _keypair = require('../test-wallet/keypair2.json');
+const _keypair = require('../test-wallet/admin.json');
 const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair))
-console.log('userKeypair', userKeypair.publicKey.toBase58());
 const userWallet = new NodeWallet(userKeypair);
 
 
@@ -19,30 +18,21 @@ describe("Typical user flow of buying an NFT", async () => {
     let sdk: SDK;
     const wallet = userWallet;
     const connection = new Connection("https://api.devnet.solana.com", "finalized");
-    console.log('wallet', wallet.publicKey.toBase58());
 
 
     it("should find a placeholder, create/transfer nft, burn placeholder", async () => {
         sdk = new SDK(
             userWallet as NodeWallet,
-            new Connection("https://api.devnet.solana.com", "confirmed"),
+            connection,
             { skipPreflight: true},
             "devnet",
         );
         const program = sdk.program;
-        const _keypair2 = require('../test-wallet/keypair.json')
-        const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
-        const admin2Wallet = new NodeWallet(admin2Keypair);
-        console.log('admin2Wallet***********', admin2Wallet.publicKey.toBase58());
+        const _keypair = require('../test-wallet/keypair.json');
+        const userKeypair = Keypair.fromSecretKey(Uint8Array.from(_keypair));
 
-        const _keypair3 = require('../test-wallet/keypair3.json')
-        const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
-        const admin3Wallet = new NodeWallet(admin3KeyPair);
-        console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
-
-
-        const buyer = userWallet.publicKey;
-        const collection_owner = userWallet.publicKey;
+        const buyer = new PublicKey('')
+        const collection_owner = new PublicKey('') 
         const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collection_owner.toBuffer()], program.programId)[0];
         console.log('placeholder collection owner', collection_owner.toBase58());
         console.log('placeholder collection', collection.toBase58());
@@ -111,7 +101,7 @@ describe("Typical user flow of buying an NFT", async () => {
                     
                     const {tx_signature, nft_mint} = await sdk.nft.createNft(
                         connection,  // connection: Connection,
-                        'ad4a356ddba9eff73cd627f69a481b8493ed975d7aac909eec4aaebdd9b506ef', // bearer
+                        'BEARER_TOKEN_HERE', // bearer
                         userKeypair, // admin
                         collection_owner, // collection owner
                         buyer, // buyer    

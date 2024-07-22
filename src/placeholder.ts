@@ -110,10 +110,10 @@ export class Placeholder {
               message: buyer.toBuffer(),
           });
             const program = this.sdk.program;
-            const uri = "https://arweave.net/-mpn67FnEePrsoKez4f6Dvjb1aMcH1CqCdZX0NCyHK8";
+            const uri = "https://arweave.net/FSfU-luPWQGQIi7oG5hUwghh4Rs9TC83ZcBaeA8t-q0";
             const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), collectionOwner.toBuffer()], program.programId)[0];
-            const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 });
+            const modifyComputeUnitIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 });
             const placeholder = PublicKey.findProgramAddressSync([Buffer.from('placeholder'), collection.toBuffer(), new anchor.BN(id).toBuffer("le", 8)], program.programId)[0];
             const placeholder_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), placeholder.toBuffer()], program.programId)[0];
             const auth = PublicKey.findProgramAddressSync([Buffer.from('auth')], program.programId)[0];

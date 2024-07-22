@@ -141,6 +141,21 @@ export type SolFactory = {
           "isSigner": false
         },
         {
+          "name": "mint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "token2022Program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "protocol",
           "isMut": false,
           "isSigner": false
@@ -191,6 +206,42 @@ export type SolFactory = {
       ]
     },
     {
+      "name": "closeCollection",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "adminState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "protocol",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createNft",
       "accounts": [
         {
@@ -206,6 +257,11 @@ export type SolFactory = {
         {
           "name": "collection",
           "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collectionMint",
+          "isMut": true,
           "isSigner": false
         },
         {

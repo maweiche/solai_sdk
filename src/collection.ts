@@ -1,5 +1,6 @@
 import { SDK } from ".";
 import * as anchor from "@coral-xyz/anchor";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey, TransactionInstruction, Connection, SystemProgram, Keypair, GetProgramAccountsConfig, MemcmpFilter } from "@solana/web3.js";
 
 export type CollectionData = {
@@ -36,7 +37,6 @@ export class Collection {
             
             const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), owner.toBuffer()], program.programId)[0];
-
             const collection_account = await connection.getAccountInfo(collection);
             if(!collection_account) return null;
 
@@ -107,6 +107,7 @@ export class Collection {
             const program = this.sdk.program;
             const protocol = PublicKey.findProgramAddressSync([Buffer.from('protocol')], program.programId)[0];
             const collection = PublicKey.findProgramAddressSync([Buffer.from('collection'), owner.toBuffer()], program.programId)[0];
+            const collection_mint = PublicKey.findProgramAddressSync([Buffer.from('mint'), collection.toBuffer()], program.programId)[0];
 
             const adminState = PublicKey.findProgramAddressSync([Buffer.from('admin_state'), admin.publicKey.toBuffer()], program.programId)[0];
             const collectionRefKey = new PublicKey("mwUt7aCktvBeSm8bry6TvqEcNSUGtxByKCbBKfkxAzA");
@@ -126,7 +127,10 @@ export class Collection {
                     admin: admin.publicKey,
                     owner,
                     collection,
+                    mint: collection_mint,
                     adminState: adminState,
+                    rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+                    token2022Program: TOKEN_2022_PROGRAM_ID,
                     protocol: protocol,
                     systemProgram: SystemProgram.programId,
                 })

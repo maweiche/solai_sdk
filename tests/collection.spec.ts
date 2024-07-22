@@ -13,18 +13,12 @@ import {
   GetProgramAccountsConfig,
   DataSizeFilter
 } from "@solana/web3.js";
-import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { describe, it } from "node:test";
 
 const _keypair2 = require('../test-wallet/keypair2.json');
 const admin2Keypair = Keypair.fromSecretKey(Uint8Array.from(_keypair2))
 const admin2Wallet = new NodeWallet(admin2Keypair);
-console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
 
-const _keypair3 = require('../test-wallet/keypair3.json');
-const admin3KeyPair = Keypair.fromSecretKey(Uint8Array.from(_keypair3))
-const admin3Wallet = new NodeWallet(admin3KeyPair);
-console.log('admin3Wallet', admin3Wallet.publicKey.toBase58());
 
 describe("Create a new collection and get all collections", async () => {
   let sdk: SDK;
@@ -82,7 +76,7 @@ describe("Create a new collection and get all collections", async () => {
     const end_date_i64 = new anchor.BN(Date.now() + 86400000); // 24 hours
 
     console.log('admin2Wallet', admin2Wallet.publicKey.toBase58());
-    const url = "https://amin.stable-dilution.art/nft/item/generation/3";
+    const url = "YOUR_URL_HERE";
     const _tx = await sdk.collection.createCollection(
       admin2Keypair, 
       admin2Wallet.publicKey, 
@@ -106,7 +100,7 @@ describe("Create a new collection and get all collections", async () => {
       { skipPreflight: true},
       "devnet",
     );
-    const owner = new PublicKey("ARTiXFSdAqtvh3MQi8GaxVa8dULaz67pwe77pGdyvkDp");
+    const owner = new PublicKey("");
     const _collection = await sdk.collection.getCollectionByOwner(connection, owner);
     
     console.log('collections', _collection);
