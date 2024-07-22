@@ -1,10 +1,7 @@
-# SolAi - Solana Program SDK
+# Vision - SolAi SDK - A Solana Program SDK
 A SDK built for use in correlation with Playground's [Vision](https://github.com/playground-solana/sol_factory) Solana program.
 
 Below you can find instructions on using the SDK locally followed by a deeper dive into the SDK's structure and details.
-
-> [!WARNING]  
-> SolAi-SDK is still in development and is unstable, there can be minor and major changes at any time.
 
 ## Program ID
 | Cluster      | Program Id |
