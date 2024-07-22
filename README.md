@@ -1,5 +1,5 @@
-# Vision - SolAi SDK - A Solana Program SDK
-A SDK built for use in correlation with Playground's [Vision](https://github.com/playground-solana/sol_factory) Solana program.
+# Vision SDK - A Solana Program SDK
+A SDK built for use in correlation with Playground's [Vision](https://github.com/playground-solana/vision_program) Solana program.
 
 Below you can find instructions on using the SDK locally followed by a deeper dive into the SDK's structure and details.
 
@@ -666,4 +666,4 @@ We welcome contributions to improve the SDK. Please raise an issue or submit a p
 
 ## License
 
-The Vision - SolAI SDK is licensed under the [MIT License](https://github.com/playground-solana/solai_sdk/LICENSE).
+The Vision - SolAI SDK is licensed under the [MIT License](https://github.com/playground-solana/vision_sdk/LICENSE).
